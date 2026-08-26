@@ -6,6 +6,8 @@ import CategoryBadge from './CategoryBadge';
 import EditEventModal from './EditEventModal';
 import AttendeesModal from './AttendeesModal';
 import RegistrationModal from './RegistrationModal';
+import EventLocationMapCard from './EventLocationMapCard';
+import EventMapModal from './EventMapModal';
 import { useAuth } from '../context/AuthContext';
 
 function formatEventDate(dateString) {
@@ -33,6 +35,7 @@ export default function EventCard({ event, onRsvpUpdate, onEventUpdated, onEvent
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAttendeesModalOpen, setIsAttendeesModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
   const { user, promptLoginForBooking } = useAuth();
   const isOwner = !!(user && event.created_by && user.id === event.created_by);
@@ -269,10 +272,21 @@ export default function EventCard({ event, onRsvpUpdate, onEventUpdated, onEvent
           {event.description}
         </p>
 
-        {/* Location Address */}
-        <div className="text-xs text-[#9291A0] mb-5 font-medium flex items-center gap-1.5 break-words">
-          <span>🏢</span>
-          <span className="truncate">{event.location}</span>
+        {/* Location Address & View Map Button */}
+        <div className="flex items-center justify-between gap-2 mb-4">
+          <div className="text-xs text-[#9291A0] font-medium flex items-center gap-1.5 break-words truncate">
+            <span>🏢</span>
+            <span className="truncate">{event.location}</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsMapModalOpen(true)}
+            className="px-3.5 py-1.5 rounded-full bg-[#EEF2FF] hover:bg-[#E0E7FF] text-[#5B4BFF] border border-[#C7D2FE] text-xs font-bold transition flex items-center gap-1 flex-shrink-0 shadow-2xs cursor-pointer"
+          >
+            <span>📍</span>
+            <span>View Map 🗺️</span>
+          </button>
         </div>
       </div>
 
@@ -349,6 +363,13 @@ export default function EventCard({ event, onRsvpUpdate, onEventUpdated, onEvent
         onClose={() => setIsRegistrationModalOpen(false)}
         event={event}
         onRsvpSuccess={handleRsvpSuccess}
+      />
+
+      {/* Interactive Location Map Popup Modal */}
+      <EventMapModal
+        isOpen={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        event={event}
       />
 
       {/* Owner Modals */}

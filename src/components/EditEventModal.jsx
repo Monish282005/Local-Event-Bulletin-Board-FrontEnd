@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axiosClient from '../api/axiosClient';
+import LocationMapPicker from './LocationMapPicker';
 import {
   fetchCountriesFromApi,
   fetchStatesFromApi,
@@ -36,6 +37,24 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
   const [ticketPrice, setTicketPrice] = useState(0);
   const [allowCancellation, setAllowCancellation] = useState(true);
   const [imageUrl, setImageUrl] = useState('');
+
+  // Structured Location States
+  const [country, setCountry] = useState('');
+  const [state, setState] = useState('');
+  const [district, setDistrict] = useState('');
+  const [city, setCity] = useState('');
+
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  // Async location options
+  const [countryOptions, setCountryOptions] = useState([]);
+  const [stateOptions, setStateOptions] = useState([]);
+  const [districtOptions, setDistrictOptions] = useState([]);
+
+  // Interactive Map State
+  const [showMap, setShowMap] = useState(true);
+  const [mapCoords, setMapCoords] = useState({ lat: 12.9716, lng: 77.5946 });
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
@@ -75,20 +94,6 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
       reader.readAsDataURL(file);
     }
   };
-
-  // Structured Location States
-  const [country, setCountry] = useState('');
-  const [state, setState] = useState('');
-  const [district, setDistrict] = useState('');
-  const [city, setCity] = useState('');
-
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  // Async location options
-  const [countryOptions, setCountryOptions] = useState([]);
-  const [stateOptions, setStateOptions] = useState([]);
-  const [districtOptions, setDistrictOptions] = useState([]);
 
   useEffect(() => {
     if (event) {
@@ -161,6 +166,70 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
     setCity('');
   };
 
+  // Map Selection Auto-fill handler
+  const handleMapLocationSelect = async (mapData) => {
+    if (!mapData) return;
+
+    const {
+      country: mCountry,
+      state: mState,
+      district: mDistrict,
+      city: mCity,
+      locationAddress: mAddress,
+      lat,
+      lng,
+    } = mapData;
+
+    if (lat && lng) {
+      setMapCoords({ lat, lng });
+    }
+
+    if (mCountry) setCountry(mCountry);
+    if (mState) setState(mState);
+    if (mDistrict) setDistrict(mDistrict);
+    if (mCity) {
+      setCity(mCity);
+      setNeighborhood(mCity);
+    }
+    if (mAddress) {
+      setLocation(mAddress);
+    }
+
+    // Async update cascading dropdown options & perform smart district matching
+    if (mCountry && mState) {
+      const states = await fetchStatesFromApi(mCountry);
+      if (states && states.length) setStateOptions(states);
+
+      const cities = await fetchCitiesFromApi(mCountry, mState);
+      if (cities && cities.length) {
+        setDistrictOptions(cities);
+
+        // Smart District Matcher against available district options
+        let matchedDistrict = cities.find(
+          (c) => c.toLowerCase() === (mDistrict || '').toLowerCase()
+        );
+
+        if (!matchedDistrict && mDistrict) {
+          matchedDistrict = cities.find(
+            (c) => mDistrict.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(mDistrict.toLowerCase())
+          );
+        }
+
+        if (!matchedDistrict && mCity) {
+          matchedDistrict = cities.find(
+            (c) => mCity.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(mCity.toLowerCase())
+          );
+        }
+
+        if (matchedDistrict) {
+          setDistrict(matchedDistrict);
+        } else if (mDistrict) {
+          setDistrict(mDistrict);
+        }
+      }
+    }
+  };
+
   if (!isOpen || !event) return null;
 
   const handleSubmit = async (e) => {
@@ -169,11 +238,11 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
 
     const effectiveNeighborhood = (neighborhood || city || '').trim();
     const effectiveCity = (city || neighborhood || '').trim();
+    const effectiveDescription = (description && description.trim()) ? description.trim() : `Join us for ${title.trim()}!`;
+    const effectiveLocation = (location && location.trim()) ? location.trim() : `${effectiveNeighborhood}, ${effectiveCity}`;
 
     if (
       !title.trim() ||
-      !description.trim() ||
-      !location.trim() ||
       !effectiveNeighborhood ||
       !eventDatetime ||
       !country ||
@@ -181,7 +250,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
       !district ||
       !effectiveCity
     ) {
-      setError('All fields including location fields are required.');
+      setError('All fields including country, state, district, and city are required.');
       return;
     }
 
@@ -196,9 +265,9 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
     try {
       const response = await axiosClient.put(`/api/events/${event.id}`, {
         title: title.trim(),
-        description: description.trim(),
+        description: effectiveDescription,
         category,
-        location: location.trim(),
+        location: effectiveLocation,
         neighborhood: effectiveNeighborhood,
         event_datetime: selectedDate.toISOString(),
         country: country.trim(),
@@ -219,12 +288,12 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
         }
       }
 
-      onClose();
       if (onEventUpdated) {
         onEventUpdated(response.data);
       }
+      onClose();
     } catch (err) {
-      console.error('Error updating event:', err);
+      console.error('Failed to update event:', err);
       setError(err.response?.data?.error || 'Failed to update event. Please try again.');
     } finally {
       setLoading(false);
@@ -233,25 +302,28 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto text-[#11112A]">
+      <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] rounded-full text-base transition font-semibold"
+          className="absolute top-5 right-5 text-[#68677A] hover:text-[#11112A] w-8 h-8 rounded-full bg-[#F4F3F8] hover:bg-[#E8E7EF] flex items-center justify-center transition font-bold"
         >
           ✕
         </button>
 
+        {/* Modal Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-extrabold text-[#11112A] mb-1">Edit Event</h2>
-          <p className="text-[#68677A] text-xs">
-            Update listing details for your community event.
-          </p>
+          <span className="inline-block text-xs font-extrabold text-[#5B4BFF] uppercase tracking-wider mb-1">
+            Edit Event Listing
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#11112A] tracking-tight">
+            Update Event Details
+          </h2>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200/80 text-red-600 text-xs font-semibold flex items-center gap-2">
-            <span>⚠️</span>
-            <span>{error}</span>
+          <div className="mb-4 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold">
+            {error}
           </div>
         )}
 
@@ -267,13 +339,35 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Event Banner Image (Optional)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#5B4BFF] file:text-white hover:file:bg-[#4C3CE6] transition cursor-pointer"
+            />
+            {imageUrl && (
+              <div className="mt-2 relative w-full h-36 rounded-2xl overflow-hidden border border-[#E8E7EF]">
+                <img src={imageUrl} alt="Banner Preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl('')}
+                  className="absolute top-2 right-2 bg-slate-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Category *</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2.5 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -295,21 +389,58 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Total Capacity / Tickets *</label>
+              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Total Tickets *</label>
               <input
                 type="number"
                 min="1"
-                max="10000"
                 required
                 value={totalTickets}
                 onChange={(e) => setTotalTickets(e.target.value)}
-                placeholder="50"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Ticket Price (₹) *</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                required
+                value={ticketPrice}
+                onChange={(e) => setTicketPrice(e.target.value)}
                 className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
               />
             </div>
           </div>
 
-          {/* Cascading Location Controls */}
+          {/* Interactive Map Picker Section */}
+          <div className="pt-2 border-t border-[#F0EFF6] space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[#5B4BFF] uppercase tracking-wider flex items-center gap-1.5">
+                <span>🗺️</span>
+                <span>Interactive Location Map Picker</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowMap(!showMap)}
+                className="text-xs font-semibold text-[#5B4BFF] hover:underline"
+              >
+                {showMap ? 'Hide Map ▲' : 'Show Map ▼'}
+              </button>
+            </div>
+
+            {showMap && (
+              <LocationMapPicker
+                initialLat={mapCoords.lat}
+                initialLng={mapCoords.lng}
+                selectedLocationText={city && state ? `${city}, ${state}, ${country}` : ''}
+                onLocationSelect={handleMapLocationSelect}
+              />
+            )}
+          </div>
+
+          {/* Cascading Structured Location Fields */}
           <div className="pt-2 border-t border-[#F0EFF6] space-y-3">
             <span className="block text-xs font-bold text-[#5B4BFF] uppercase tracking-wider">Event Location Region</span>
 
@@ -371,7 +502,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
                     setNeighborhood(e.target.value);
                   }}
                   disabled={!district}
-                  placeholder="e.g. Indiranagar, Komarapalayam, Bengaluru"
+                  placeholder="e.g. Indiranagar, Komarapalayam, Karutr"
                   className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
                 />
               </div>
@@ -418,16 +549,16 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-full bg-white hover:bg-slate-100 text-[#68677A] text-xs font-semibold border border-[#E8E7EF] transition"
+              className="px-5 py-2.5 rounded-full border border-[#E8E7EF] text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] font-semibold text-xs transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] active:bg-[#3F2FD1] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 disabled:opacity-50"
+              className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? 'Saving Changes...' : 'Save Changes'}
             </button>
           </div>
         </form>

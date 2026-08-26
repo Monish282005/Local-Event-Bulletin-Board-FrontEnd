@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
+import LocationMapPicker from './LocationMapPicker';
+import { forwardGeocode } from '../utils/mapGeocodingHelper';
 import {
   fetchCountriesFromApi,
   fetchStatesFromApi,
@@ -26,76 +28,41 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('sports');
   const [location, setLocation] = useState('');
-  const [neighborhood, setNeighborhood] = useState(user?.city || '');
+  const [neighborhood, setNeighborhood] = useState('');
   const [eventDatetime, setEventDatetime] = useState('');
   const [totalTickets, setTotalTickets] = useState(50);
   const [ticketPrice, setTicketPrice] = useState(0);
   const [allowCancellation, setAllowCancellation] = useState(true);
   const [imageUrl, setImageUrl] = useState('');
-
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 20 * 1024 * 1024) {
-        setError('Image file size must be less than 20MB.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const maxDim = 1200;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressed = canvas.toDataURL('image/jpeg', 0.85);
-          setImageUrl(compressed);
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Structured Location States (pre-filled with logged-in user location if available)
-  const [country, setCountry] = useState(user?.country || '');
-  const [state, setState] = useState(user?.state || '');
-  const [district, setDistrict] = useState(user?.district || '');
-  const [city, setCity] = useState(user?.city || '');
-
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Sync user location defaults when modal opens or user updates
-  useEffect(() => {
-    if (isOpen && user) {
-      setCountry(user.country || '');
-      setState(user.state || '');
-      setDistrict(user.district || '');
-      setCity(user.city || '');
-      setNeighborhood(user.city || '');
-    }
-  }, [isOpen, user]);
+  // Cascading location state
+  const [country, setCountry] = useState('India');
+  const [state, setState] = useState('');
+  const [district, setDistrict] = useState('');
+  const [city, setCity] = useState('');
 
-  // Async location options
   const [countryOptions, setCountryOptions] = useState([]);
   const [stateOptions, setStateOptions] = useState([]);
   const [districtOptions, setDistrictOptions] = useState([]);
+
+  // Interactive Map State
+  const [showMap, setShowMap] = useState(true);
+  const [mapCoords, setMapCoords] = useState({ lat: 12.9716, lng: 77.5946 });
+
+  // Auto-fill defaults from User profile if available
+  useEffect(() => {
+    if (user && isOpen) {
+      if (user.country) setCountry(user.country);
+      if (user.state) setState(user.state);
+      if (user.district) setDistrict(user.district);
+      if (user.city) {
+        setCity(user.city);
+        setNeighborhood(user.city);
+      }
+    }
+  }, [user, isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -146,6 +113,114 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
     setCity('');
   };
 
+  // Map Selection Auto-fill handler
+  const handleMapLocationSelect = async (mapData) => {
+    if (!mapData) return;
+
+    const {
+      country: mCountry,
+      state: mState,
+      district: mDistrict,
+      city: mCity,
+      locationAddress: mAddress,
+      lat,
+      lng,
+    } = mapData;
+
+    if (lat && lng) {
+      setMapCoords({ lat, lng });
+    }
+
+    if (mCountry) setCountry(mCountry);
+    if (mState) setState(mState);
+    if (mDistrict) setDistrict(mDistrict);
+    if (mCity) {
+      setCity(mCity);
+      setNeighborhood(mCity);
+    }
+    if (mAddress) {
+      setLocation(mAddress);
+    }
+
+    // Async update cascading dropdown options & perform smart district matching
+    if (mCountry && mState) {
+      const states = await fetchStatesFromApi(mCountry);
+      if (states && states.length) setStateOptions(states);
+
+      const cities = await fetchCitiesFromApi(mCountry, mState);
+      if (cities && cities.length) {
+        setDistrictOptions(cities);
+
+        // Smart District Matcher against available district options
+        let matchedDistrict = cities.find(
+          (c) => c.toLowerCase() === (mDistrict || '').toLowerCase()
+        );
+
+        if (!matchedDistrict && mDistrict) {
+          matchedDistrict = cities.find(
+            (c) => mDistrict.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(mDistrict.toLowerCase())
+          );
+        }
+
+        if (!matchedDistrict && mCity) {
+          matchedDistrict = cities.find(
+            (c) => mCity.toLowerCase().includes(c.toLowerCase()) || c.toLowerCase().includes(mCity.toLowerCase())
+          );
+        }
+
+        if (matchedDistrict) {
+          setDistrict(matchedDistrict);
+        } else if (mDistrict) {
+          setDistrict(mDistrict);
+        }
+      }
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Image file size must be less than 10MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 1200;
+        const MAX_HEIGHT = 800;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+        setImageUrl(compressedDataUrl);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
@@ -181,6 +256,22 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
     setLoading(true);
 
     try {
+      let finalLat = mapCoords?.lat || null;
+      let finalLng = mapCoords?.lng || null;
+
+      if (!finalLat || !finalLng) {
+        try {
+          const query = `${effectiveLocation}, ${effectiveCity}, ${state.trim()}, ${country.trim()}`;
+          const results = await forwardGeocode(query);
+          if (results && results.length > 0) {
+            finalLat = results[0].lat;
+            finalLng = results[0].lng;
+          }
+        } catch (gErr) {
+          console.warn('Forward geocoding notice:', gErr);
+        }
+      }
+
       const response = await axiosClient.post('/api/events', {
         title: title.trim(),
         description: effectiveDescription,
@@ -195,6 +286,8 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
         total_tickets: parseInt(totalTickets, 10) || 50,
         ticket_price: Math.max(0, parseFloat(ticketPrice) || 0),
         allow_cancellation: allowCancellation,
+        latitude: finalLat,
+        longitude: finalLng,
         image_url: imageUrl || null,
       });
 
@@ -218,13 +311,13 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
       setImageUrl('');
       setError(null);
 
-      onClose();
       if (onEventCreated) {
-        onEventCreated(response.data);
+        onEventCreated();
       }
+      onClose();
     } catch (err) {
-      console.error('Error creating event:', err);
-      setError(err.response?.data?.error || 'Failed to create event. Please try again.');
+      console.error('Failed to post event:', err);
+      setError(err.response?.data?.error || 'Failed to post event. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -232,25 +325,31 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto text-[#11112A]">
+      <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] rounded-full text-base transition font-semibold"
+          className="absolute top-5 right-5 text-[#68677A] hover:text-[#11112A] w-8 h-8 rounded-full bg-[#F4F3F8] hover:bg-[#E8E7EF] flex items-center justify-center transition font-bold"
         >
           ✕
         </button>
 
+        {/* Modal Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-extrabold text-[#11112A] mb-1">Post a New Event</h2>
-          <p className="text-[#68677A] text-xs">
-            Share an upcoming gathering or announcement with your local neighborhood.
+          <span className="inline-block text-xs font-extrabold text-[#5B4BFF] uppercase tracking-wider mb-1">
+            Community Bulletin
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-[#11112A] tracking-tight">
+            Post a New Local Event
+          </h2>
+          <p className="text-xs sm:text-sm text-[#68677A] font-medium mt-1">
+            Pick a spot on the interactive map or select regions to auto-fill Country, State, District, City & Address!
           </p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200/80 text-red-600 text-xs font-semibold flex items-center gap-2">
-            <span>⚠️</span>
-            <span>{error}</span>
+          <div className="mb-4 p-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold">
+            {error}
           </div>
         )}
 
@@ -345,6 +444,32 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             </div>
           </div>
 
+          {/* Interactive Map Picker Section */}
+          <div className="pt-2 border-t border-[#F0EFF6] space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-[#5B4BFF] uppercase tracking-wider flex items-center gap-1.5">
+                <span>🗺️</span>
+                <span>Interactive Location Map Picker</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowMap(!showMap)}
+                className="text-xs font-semibold text-[#5B4BFF] hover:underline"
+              >
+                {showMap ? 'Hide Map ▲' : 'Show Map ▼'}
+              </button>
+            </div>
+
+            {showMap && (
+              <LocationMapPicker
+                initialLat={mapCoords.lat}
+                initialLng={mapCoords.lng}
+                selectedLocationText={city && state ? `${city}, ${state}, ${country}` : ''}
+                onLocationSelect={handleMapLocationSelect}
+              />
+            )}
+          </div>
+
           {/* Cascading Structured Location Fields */}
           <div className="pt-2 border-t border-[#F0EFF6] space-y-3">
             <span className="block text-xs font-bold text-[#5B4BFF] uppercase tracking-wider">Event Location Region</span>
@@ -407,7 +532,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                     setNeighborhood(e.target.value);
                   }}
                   disabled={!district}
-                  placeholder="e.g. Indiranagar, Komarapalayam, Bengaluru"
+                  placeholder="e.g. Indiranagar, Komarapalayam, Karutr"
                   className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
                 />
               </div>
@@ -438,33 +563,36 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             />
           </div>
 
-          <div className="flex items-center justify-between p-3.5 bg-[#F8F7FC] border border-[#E8E7EF] rounded-xl">
-            <div>
-              <label className="text-xs font-bold text-[#11112A] block">Allow Ticket Cancellations</label>
-              <span className="text-[10px] text-[#68677A] font-medium">Permit registered attendees to cancel their booking passes</span>
-            </div>
-            <input
-              type="checkbox"
-              checked={allowCancellation}
-              onChange={(e) => setAllowCancellation(e.target.checked)}
-              className="w-4 h-4 text-[#5B4BFF] rounded focus:ring-[#5B4BFF] border-[#E8E7EF] cursor-pointer"
-            />
+          {/* Cancellation Policy Checkbox */}
+          <div className="pt-2 border-t border-[#F0EFF6]">
+            <label className="flex items-center gap-2.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={allowCancellation}
+                onChange={(e) => setAllowCancellation(e.target.checked)}
+                className="w-4 h-4 rounded text-[#5B4BFF] focus:ring-[#5B4BFF]"
+              />
+              <span className="text-xs font-semibold text-[#11112A]">
+                Allow attendees to cancel their booking passes
+              </span>
+            </label>
           </div>
 
-          <div className="pt-3 flex items-center justify-end gap-3">
+          {/* Buttons */}
+          <div className="pt-3 flex items-center justify-end gap-3 border-t border-[#F0EFF6]">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-full bg-white hover:bg-slate-100 text-[#68677A] text-xs font-semibold border border-[#E8E7EF] transition"
+              className="px-5 py-2.5 rounded-full border border-[#E8E7EF] text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] font-semibold text-xs transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] active:bg-[#3F2FD1] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 disabled:opacity-50"
+              className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 disabled:opacity-50"
             >
-              {loading ? 'Publishing...' : 'Publish Event'}
+              {loading ? 'Publishing Event...' : 'Publish Event'}
             </button>
           </div>
         </form>
