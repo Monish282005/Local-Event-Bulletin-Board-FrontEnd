@@ -94,6 +94,7 @@ export default function TieredEventBoard({
   feedData,
   loading,
   error,
+  selectedCity,
   onRetry,
   onPageChange,
   onRsvpUpdate,
@@ -121,7 +122,7 @@ export default function TieredEventBoard({
         <p className="text-[#68677A] text-sm mb-6">{error}</p>
         <button
           onClick={onRetry}
-          className="px-6 py-2.5 rounded-full bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition shadow-md shadow-red-600/20"
+          className="px-6 py-2.5 rounded-full bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition shadow-md shadow-red-600/20 cursor-pointer"
         >
           Try Again
         </button>
@@ -137,14 +138,13 @@ export default function TieredEventBoard({
     pagination = {},
   } = feedData || {};
 
-  const isLoggedIn = userLocation.isAuthenticated === true;
-  const city = userLocation.city || 'Bengaluru';
+  const city = selectedCity || userLocation.city || 'Coimbatore';
   const state = userLocation.state || 'Karnataka';
   const country = userLocation.country || 'India';
 
-  const topPicksTitle = isLoggedIn ? `Top Picks in ${city}` : '🔥 Top Picks & Featured Events';
-  const stateTitle = isLoggedIn ? `More in ${state}` : `🏙️ Popular in ${state}`;
-  const countryTitle = isLoggedIn ? `Across ${country}` : `🌍 National Events in ${country}`;
+  const topPicksTitle = `Top Picks in ${city}`;
+  const stateTitle = `More in ${state}`;
+  const countryTitle = `Across ${country}`;
 
   return (
     <div className="space-y-6">

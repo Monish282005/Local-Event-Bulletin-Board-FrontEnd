@@ -31,7 +31,7 @@ export async function fetchCountriesFromApi() {
 
   const apiKey = getApiKey();
   try {
-    console.log('[locationData] Dispatching GET https://api.countrystatecity.in/v1/countries');
+    // console.log('[locationData] Dispatching GET https://api.countrystatecity.in/v1/countries');
     const response = await axios.get(`${CSC_BASE_URL}/countries`, {
       headers: { 'X-CSCAPI-KEY': apiKey },
     });
@@ -61,7 +61,7 @@ export async function fetchStatesFromApi(countryName) {
 
   const apiKey = getApiKey();
   try {
-    console.log(`[locationData] Dispatching GET https://api.countrystatecity.in/v1/countries/${cObj.isoCode}/states`);
+    // console.log(`[locationData] Dispatching GET https://api.countrystatecity.in/v1/countries/${cObj.isoCode}/states`);
     const response = await axios.get(`${CSC_BASE_URL}/countries/${cObj.isoCode}/states`, {
       headers: { 'X-CSCAPI-KEY': apiKey },
     });
@@ -102,7 +102,7 @@ export async function fetchCitiesFromApi(countryName, stateName) {
 
   const apiKey = getApiKey();
   try {
-    console.log(`[locationData] Dispatching GET https://api.countrystatecity.in/v1/countries/${cObj.isoCode}/states/${sObj.isoCode}/cities`);
+    // console.log(`[locationData] Dispatching GET https://api.countrystatecity.in/v1/countries/${cObj.isoCode}/states/${sObj.isoCode}/cities`);
     const response = await axios.get(
       `${CSC_BASE_URL}/countries/${cObj.isoCode}/states/${sObj.isoCode}/cities`,
       { headers: { 'X-CSCAPI-KEY': apiKey } }
