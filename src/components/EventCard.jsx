@@ -24,6 +24,8 @@ function formatEventDate(dateString) {
 
 export default function EventCard({ event, onRsvpUpdate, onEventUpdated, onEventDeleted }) {
   const [rsvpCount, setRsvpCount] = useState(event.rsvp_count || 0);
+  const [interestedCount, setInterestedCount] = useState(event.interested_count || 0);
+  const [hasMarkedInterested, setHasMarkedInterested] = useState(false);
   const [copied, setCopied] = useState(false);
   const [ticketNotice, setTicketNotice] = useState(null);
 
@@ -38,6 +40,46 @@ export default function EventCard({ event, onRsvpUpdate, onEventUpdated, onEvent
   const totalTickets = event.total_tickets || 50;
   const isSoldOut = rsvpCount >= totalTickets;
   const remainingTickets = Math.max(0, totalTickets - rsvpCount);
+
+  // Retrieve image from event object or localStorage fallback
+  const displayImage = event.image_url || localStorage.getItem(`event_img_${event.id}`);
+
+  // Sync user interest state per event
+  React.useEffect(() => {
+    if (user && user.id && event.id) {
+      const isSet = localStorage.getItem(`user_interested_${user.id}_${event.id}`) === 'true';
+      setHasMarkedInterested(isSet);
+    } else {
+      setHasMarkedInterested(false);
+    }
+  }, [user, event.id]);
+
+  const handleInterestedClick = async () => {
+    if (!user) {
+      promptLoginForBooking(event);
+      return;
+    }
+
+    const storageKey = `user_interested_${user.id}_${event.id}`;
+    const nextState = !hasMarkedInterested;
+
+    setHasMarkedInterested(nextState);
+    if (nextState) {
+      setInterestedCount((prev) => prev + 1);
+      localStorage.setItem(storageKey, 'true');
+    } else {
+      setInterestedCount((prev) => Math.max(0, prev - 1));
+      localStorage.removeItem(storageKey);
+    }
+
+    try {
+      await axiosClient.post(`/api/events/${event.id}/interested`, {
+        action: nextState ? 'add' : 'remove',
+      });
+    } catch (err) {
+      console.warn('Failed to toggle interest:', err);
+    }
+  };
 
   const handleRsvpClick = () => {
     if (isSoldOut) return;
@@ -130,15 +172,28 @@ export default function EventCard({ event, onRsvpUpdate, onEventUpdated, onEvent
   };
 
   return (
-    <div className="bg-white border border-[#E8E7EF] rounded-2xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group">
+    <div className="bg-white border border-[#E8E7EF] rounded-3xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group overflow-hidden">
       <div>
+        {/* Event Banner Image (Rendered above details) */}
+        {displayImage && (
+          <div className="w-[calc(100%+3rem)] -mx-6 -mt-6 h-48 mb-5 overflow-hidden border-b border-[#E8E7EF] relative group-hover:opacity-95 transition">
+            <img
+              src={displayImage}
+              alt={event.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            />
+          </div>
+        )}
+
         {/* Header & Badges */}
         <div className="flex items-center justify-between gap-2 mb-4">
           <CategoryBadge category={event.category} />
 
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-[#68677A] bg-[#F4F3F8] px-3 py-1 rounded-full border border-[#E8E7EF] flex items-center gap-1">
-              📍 {event.neighborhood}
+              📍 {event.neighborhood && event.city && event.neighborhood.trim().toLowerCase() !== event.city.trim().toLowerCase()
+                ? `${event.neighborhood}, ${event.city}`
+                : (event.city || event.neighborhood)}
             </span>
 
             {/* Owner Controls */}
@@ -204,47 +259,59 @@ export default function EventCard({ event, onRsvpUpdate, onEventUpdated, onEvent
         </div>
       )}
 
-      {/* Footer Controls */}
-      <div className="pt-4 border-t border-[#F0EFF6] flex items-center justify-between gap-3">
-        {/* RSVP Primary CTA & Attendee Pill */}
-        <div className="flex items-center gap-2">
+      {/* Footer Controls (Distinct Register vs I'm Going Buttons) */}
+      <div className="pt-4 border-t border-[#F0EFF6] flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Register Button */}
           {isSoldOut ? (
             <button
               disabled
-              className="px-4 py-2 rounded-full bg-slate-200 text-slate-500 font-semibold text-xs transition duration-150 cursor-not-allowed border border-slate-300"
+              className="px-3.5 py-1.5 rounded-full bg-slate-200 text-slate-500 font-semibold text-xs cursor-not-allowed border border-slate-300"
             >
               🚫 Sold Out
             </button>
           ) : (
             <button
               onClick={handleRsvpClick}
-              className="px-4 py-2 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] active:bg-[#3F2FD1] text-white font-semibold text-xs transition duration-150 flex items-center gap-1.5 shadow-md shadow-[#5B4BFF]/20 cursor-pointer"
+              className="px-3.5 py-1.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-md shadow-[#5B4BFF]/20 cursor-pointer"
             >
-              <span>🙌</span>
-              <span>I'm Going</span>
+              <span>🎟️</span>
+              <span>Register</span>
             </button>
           )}
 
+          {/* I'm Going (Interest Counter) Button */}
+          <button
+            onClick={handleInterestedClick}
+            className={`px-3 py-1.5 rounded-full font-semibold text-xs transition flex items-center gap-1 border cursor-pointer ${
+              hasMarkedInterested
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                : 'bg-[#F4F3F8] hover:bg-[#EAE8F5] text-[#11112A] border-[#E8E7EF]'
+            }`}
+            title="Mark that you are interested in going!"
+          >
+            <span>🙌</span>
+            <span>I'm Going ({interestedCount})</span>
+          </button>
+
+          {/* Tickets Left Badge */}
           <span
-            className={`text-xs font-bold px-3 py-1.5 rounded-full border transition flex items-center gap-1.5 ${
+            className={`text-xs font-bold px-2.5 py-1.5 rounded-full border transition flex items-center gap-1 ${
               remainingTickets === 0
                 ? 'bg-red-50 text-red-600 border-red-200'
                 : remainingTickets <= 5
                 ? 'bg-amber-50 text-amber-700 border-amber-200'
-                : 'bg-[#F4F3F8] text-[#11112A] border-[#E8E7EF]'
+                : 'bg-[#F4F3F8] text-[#68677A] border-[#E8E7EF]'
             }`}
-            title={`${rsvpCount} registered out of ${totalTickets} total capacity`}
           >
-            <span>🎟️</span>
-            <span>{remainingTickets} {remainingTickets === 1 ? 'Ticket' : 'Tickets'} Left</span>
+            <span>{remainingTickets} Left</span>
           </span>
         </div>
 
         {/* Share Button */}
         <button
           onClick={handleCopyLink}
-          className="px-3.5 py-1.5 rounded-full bg-white hover:bg-slate-50 text-[#68677A] hover:text-[#11112A] text-xs font-semibold border border-[#E8E7EF] transition flex items-center gap-1 shadow-sm"
-          title="Share event link"
+          className="px-3 py-1.5 rounded-full bg-white hover:bg-slate-50 text-[#68677A] text-xs font-semibold border border-[#E8E7EF] transition flex items-center gap-1 shadow-sm"
         >
           <span>{copied ? '✅' : '🔗'}</span>
           <span>{copied ? 'Copied!' : 'Share'}</span>

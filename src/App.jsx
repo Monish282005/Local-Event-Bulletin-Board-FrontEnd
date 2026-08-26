@@ -3,10 +3,12 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import BoardPage from './pages/BoardPage';
 import MyEventsPage from './pages/MyEventsPage';
 import MyBookingsPage from './pages/MyBookingsPage';
+import ProfilePage from './pages/ProfilePage';
 import EventDetailPage from './pages/EventDetailPage';
 import AuthModal from './components/AuthModal';
 import RegistrationModal from './components/RegistrationModal';
 import Swal from 'sweetalert2';
+import CompleteProfileModal from './components/CompleteProfileModal';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 function ProtectedRoute({ children }) {
@@ -36,10 +38,12 @@ function ProtectedRoute({ children }) {
 
 function AppContent() {
   const [activeRegistrationEvent, setActiveRegistrationEvent] = useState(null);
+  const [isCompleteProfileModalOpen, setIsCompleteProfileModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   const {
+    user,
     isAuthenticated,
     isAuthModalOpen,
     setIsAuthModalOpen,
@@ -54,6 +58,13 @@ function AppContent() {
     }
   }, [isAuthenticated, pendingBookingEvent]);
 
+  // Open CompleteProfileModal if user has logged in (e.g. via Google) but missing phone number
+  useEffect(() => {
+    if (isAuthenticated && user && !user.phone) {
+      setIsCompleteProfileModalOpen(true);
+    }
+  }, [isAuthenticated, user]);
+
   const handleAuthSuccess = () => {
     setIsAuthModalOpen(false);
     if (location.state?.from && location.state.from !== '/') {
@@ -66,6 +77,22 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<BoardPage />} />
         <Route path="/feed" element={<BoardPage />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/my-events"
           element={
@@ -114,6 +141,11 @@ function AppContent() {
           }}
         />
       )}
+      {/* Complete Profile Modal for missing phone/location details after Google login */}
+      <CompleteProfileModal
+        isOpen={isCompleteProfileModalOpen}
+        onClose={() => setIsCompleteProfileModalOpen(false)}
+      />
     </>
   );
 }

@@ -30,6 +30,22 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
   const [eventDatetime, setEventDatetime] = useState('');
   const [totalTickets, setTotalTickets] = useState(50);
   const [allowCancellation, setAllowCancellation] = useState(true);
+  const [imageUrl, setImageUrl] = useState('');
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image file size must be less than 5MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Structured Location States (pre-filled with logged-in user location if available)
   const [country, setCountry] = useState(user?.country || '');
@@ -153,7 +169,16 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
         event_datetime: selectedDate.toISOString(),
         total_tickets: parseInt(totalTickets, 10) || 50,
         allow_cancellation: allowCancellation,
+        image_url: imageUrl || null,
       });
+
+      if (response.data?.id && imageUrl) {
+        try {
+          localStorage.setItem(`event_img_${response.data.id}`, imageUrl);
+        } catch (e) {
+          console.warn('LocalStorage image quota notice');
+        }
+      }
 
       // Clear form
       setTitle('');
@@ -163,6 +188,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
       setNeighborhood('');
       setEventDatetime('');
       setTotalTickets(50);
+      setImageUrl('');
       setError(null);
 
       onClose();
@@ -212,6 +238,28 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
               placeholder="e.g. Summer Community BBQ & Live Band"
               className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Event Banner Image (Optional)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#5B4BFF] file:text-white hover:file:bg-[#4C3CE6] transition cursor-pointer"
+            />
+            {imageUrl && (
+              <div className="mt-2 relative w-full h-36 rounded-2xl overflow-hidden border border-[#E8E7EF]">
+                <img src={imageUrl} alt="Banner Preview" className="w-full h-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setImageUrl('')}
+                  className="absolute top-2 right-2 bg-slate-900/70 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

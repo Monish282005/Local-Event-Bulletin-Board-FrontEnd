@@ -99,6 +99,23 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
+  const loginWithGoogle = async (googlePayload) => {
+    const res = await axiosClient.post('/api/auth/google', googlePayload);
+    const { token: newToken, user: newUser } = res.data;
+    localStorage.setItem('token', newToken);
+    setToken(newToken);
+    setUser(newUser);
+    return res.data;
+  };
+
+  const updateProfile = async (updateData) => {
+    const res = await axiosClient.put('/api/auth/me', updateData);
+    if (res.data && res.data.user) {
+      setUser(res.data.user);
+    }
+    return res.data;
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -112,15 +129,17 @@ export function AuthProvider({ children }) {
         user,
         token,
         loading,
-        login,
-        signup,
-        logout,
-        isAuthenticated: !!token,
+        isAuthenticated: !!token && !!user,
         isAuthModalOpen,
         setIsAuthModalOpen,
         pendingBookingEvent,
         setPendingBookingEvent,
         promptLoginForBooking,
+        login,
+        signup,
+        loginWithGoogle,
+        updateProfile,
+        logout,
       }}
     >
       {children}
