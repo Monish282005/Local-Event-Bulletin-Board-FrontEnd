@@ -33,7 +33,48 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
   const [neighborhood, setNeighborhood] = useState('');
   const [eventDatetime, setEventDatetime] = useState('');
   const [totalTickets, setTotalTickets] = useState(50);
+  const [ticketPrice, setTicketPrice] = useState(0);
   const [allowCancellation, setAllowCancellation] = useState(true);
+  const [imageUrl, setImageUrl] = useState('');
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 20 * 1024 * 1024) {
+        setError('Image file size must be less than 20MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
+          setImageUrl(compressed);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Structured Location States
   const [country, setCountry] = useState('');
@@ -58,7 +99,9 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
       setNeighborhood(event.neighborhood || '');
       setEventDatetime(toLocalDatetimeString(event.event_datetime));
       setTotalTickets(event.total_tickets || 50);
+      setTicketPrice(event.ticket_price || 0);
       setAllowCancellation(event.allow_cancellation !== false);
+      setImageUrl(event.image_url || localStorage.getItem(`event_img_${event.id}`) || '');
 
       setCountry(event.country || '');
       setState(event.state || '');
@@ -163,8 +206,18 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
         district: district.trim(),
         city: effectiveCity,
         total_tickets: parseInt(totalTickets, 10) || 50,
+        ticket_price: Math.max(0, parseFloat(ticketPrice) || 0),
         allow_cancellation: allowCancellation,
+        image_url: imageUrl || null,
       });
+
+      if (imageUrl) {
+        try {
+          localStorage.setItem(`event_img_${event.id}`, imageUrl);
+        } catch (e) {
+          console.warn('LocalStorage image quota notice');
+        }
+      }
 
       onClose();
       if (onEventUpdated) {

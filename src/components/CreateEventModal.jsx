@@ -29,19 +29,44 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
   const [neighborhood, setNeighborhood] = useState(user?.city || '');
   const [eventDatetime, setEventDatetime] = useState('');
   const [totalTickets, setTotalTickets] = useState(50);
+  const [ticketPrice, setTicketPrice] = useState(0);
   const [allowCancellation, setAllowCancellation] = useState(true);
   const [imageUrl, setImageUrl] = useState('');
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Image file size must be less than 5MB.');
+      if (file.size > 20 * 1024 * 1024) {
+        setError('Image file size must be less than 20MB.');
         return;
       }
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImageUrl(reader.result);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxDim = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.85);
+          setImageUrl(compressed);
+        };
+        img.src = reader.result;
       };
       reader.readAsDataURL(file);
     }
@@ -129,12 +154,12 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
 
     const effectiveNeighborhood = (neighborhood || city || '').trim();
     const effectiveCity = (city || neighborhood || '').trim();
+    const effectiveDescription = (description && description.trim()) ? description.trim() : `Join us for ${title.trim()}!`;
+    const effectiveLocation = (location && location.trim()) ? location.trim() : `${effectiveNeighborhood}, ${effectiveCity}`;
 
     // Basic required check
     if (
       !title.trim() ||
-      !description.trim() ||
-      !location.trim() ||
       !effectiveNeighborhood ||
       !eventDatetime ||
       !country ||
@@ -158,9 +183,9 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
     try {
       const response = await axiosClient.post('/api/events', {
         title: title.trim(),
-        description: description.trim(),
+        description: effectiveDescription,
         category,
-        location: location.trim(),
+        location: effectiveLocation,
         neighborhood: effectiveNeighborhood,
         country: country.trim(),
         state: state.trim(),
@@ -168,6 +193,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
         city: effectiveCity,
         event_datetime: selectedDate.toISOString(),
         total_tickets: parseInt(totalTickets, 10) || 50,
+        ticket_price: Math.max(0, parseFloat(ticketPrice) || 0),
         allow_cancellation: allowCancellation,
         image_url: imageUrl || null,
       });
@@ -188,6 +214,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
       setNeighborhood('');
       setEventDatetime('');
       setTotalTickets(50);
+      setTicketPrice(0);
       setImageUrl('');
       setError(null);
 
@@ -262,13 +289,13 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Category *</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2.5 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -290,7 +317,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Total Capacity / Tickets *</label>
+              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Total Tickets *</label>
               <input
                 type="number"
                 min="1"
@@ -299,6 +326,20 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                 value={totalTickets}
                 onChange={(e) => setTotalTickets(e.target.value)}
                 placeholder="50"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Ticket Price (₹) *</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                required
+                value={ticketPrice}
+                onChange={(e) => setTicketPrice(e.target.value)}
+                placeholder="0 (Free)"
                 className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
               />
             </div>

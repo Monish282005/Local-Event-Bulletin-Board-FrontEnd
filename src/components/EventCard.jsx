@@ -175,19 +175,44 @@ export default function EventCard({ event, onRsvpUpdate, onEventUpdated, onEvent
     <div className="bg-white border border-[#E8E7EF] rounded-3xl p-6 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between relative group overflow-hidden">
       <div>
         {/* Event Banner Image (Rendered above details) */}
-        {displayImage && (
-          <div className="w-[calc(100%+3rem)] -mx-6 -mt-6 h-48 mb-5 overflow-hidden border-b border-[#E8E7EF] relative group-hover:opacity-95 transition">
+        {displayImage ? (
+          <div className="w-[calc(100%+3rem)] -mx-6 -mt-6 h-48 mb-5 overflow-hidden border-b border-[#E8E7EF] relative group-hover:opacity-95 transition bg-[#F4F3F8]">
             <img
               src={displayImage}
               alt={event.title}
               className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.style.display = 'none';
+                if (e.target.nextSibling) {
+                  e.target.nextSibling.style.display = 'flex';
+                }
+              }}
             />
+            <div className="hidden w-full h-full bg-gradient-to-br from-[#F4F3F8] to-[#E8E7EF] items-center justify-center flex-col gap-1 text-[#68677A]">
+              <span className="text-2xl">📷</span>
+              <span className="text-xs font-bold uppercase tracking-wider">No Image Found</span>
+            </div>
+          </div>
+        ) : (
+          <div className="w-[calc(100%+3rem)] -mx-6 -mt-6 h-48 mb-5 overflow-hidden border-b border-[#E8E7EF] relative bg-gradient-to-br from-[#F4F3F8] to-[#E8E7EF] flex flex-col items-center justify-center gap-1.5 text-[#68677A] group-hover:opacity-95 transition">
+            <span className="text-3xl opacity-60">📷</span>
+            <span className="text-xs font-bold uppercase tracking-widest text-[#68677A]">No Image Found</span>
           </div>
         )}
 
         {/* Header & Badges */}
         <div className="flex items-center justify-between gap-2 mb-4">
-          <CategoryBadge category={event.category} />
+          <div className="flex items-center gap-2">
+            <CategoryBadge category={event.category} />
+            <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+              event.ticket_price > 0
+                ? 'bg-[#EEF2FF] text-[#4F46E5] border-[#C7D2FE]'
+                : 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]'
+            }`}>
+              {event.ticket_price > 0 ? `₹${event.ticket_price} / Ticket` : 'FREE'}
+            </span>
+          </div>
 
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold text-[#68677A] bg-[#F4F3F8] px-3 py-1 rounded-full border border-[#E8E7EF] flex items-center gap-1">
