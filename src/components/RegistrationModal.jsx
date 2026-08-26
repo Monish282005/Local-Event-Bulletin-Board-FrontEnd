@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import axiosClient from '../api/axiosClient';
+import { useAuth } from '../context/AuthContext';
+import InvoiceModal from './InvoiceModal';
 
 function formatEventDate(dateString) {
   if (!dateString) return '';
@@ -16,10 +20,44 @@ function formatEventDate(dateString) {
   }).format(date);
 }
 
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      return resolve(true);
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 export default function RegistrationModal({ isOpen, onClose, event, onRsvpSuccess }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [invoiceData, setInvoiceData] = useState(null);
+  const [showInvoice, setShowInvoice] = useState(false);
+
+  if (showInvoice && invoiceData) {
+    return (
+      <InvoiceModal
+        isOpen={true}
+        onClose={() => {
+          setShowInvoice(false);
+          setInvoiceData(null);
+          onClose();
+          navigate('/my-bookings');
+        }}
+        invoiceData={invoiceData}
+      />
+    );
+  }
 
   if (!isOpen || !event) return null;
 
@@ -28,30 +66,125 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
   const remainingTickets = Math.max(0, totalTickets - rsvpCount);
   const maxAllowed = Math.min(10, remainingTickets);
 
+  const ticketPrice = event.ticket_price || 0;
+  const totalPrice = ticketPrice * quantity;
+
   const organizerName = event.creator?.name || 'Community Event Host';
   const organizerEmail = event.creator?.email || 'contact@localbulletin.com';
 
-  const handleSubmit = async (e) => {
+  const handleBooking = async (e) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      const response = await axiosClient.post(`/api/events/${event.id}/rsvp`, {
-        ticket_quantity: quantity,
-      });
+      if (totalPrice <= 0) {
+        // Free Event Registration
+        const response = await axiosClient.post(`/api/events/${event.id}/rsvp`, {
+          ticket_quantity: quantity,
+        });
 
-      const newCount = response.data.rsvp_count;
-      const ticketNumbers = response.data.ticket_numbers || [response.data.ticket_number];
+        const newCount = response.data.rsvp_count;
+        const ticketNumbers = response.data.ticket_numbers || [response.data.ticket_number];
 
-      if (onRsvpSuccess) {
-        onRsvpSuccess(event.id, newCount, ticketNumbers);
+        if (onRsvpSuccess) {
+          onRsvpSuccess(event.id, newCount, ticketNumbers);
+        }
+
+        // Green Success Popup
+        await Swal.fire({
+          title: 'Registration Successful! 🎉',
+          text: `Your ticket pass #${ticketNumbers.join(', #')} has been confirmed.`,
+          icon: 'success',
+          confirmButtonColor: '#10B981',
+          confirmButtonText: 'View My Bookings 🎟️',
+          customClass: {
+            popup: 'rounded-3xl p-6 font-sans',
+            confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md shadow-emerald-500/25',
+          },
+        });
+
+        onClose();
+        navigate('/my-bookings');
+      } else {
+        // Paid Event Razorpay Checkout
+        const scriptLoaded = await loadRazorpayScript();
+        if (!scriptLoaded) {
+          setError('Failed to load Razorpay payment gateway script. Please check your network connection.');
+          setLoading(false);
+          return;
+        }
+
+        const orderRes = await axiosClient.post(`/api/events/${event.id}/create-razorpay-order`, {
+          ticket_quantity: quantity,
+        });
+
+        const orderData = orderRes.data;
+
+        const options = {
+          key: orderData.key_id || 'rzp_test_TULuQjSNHLksoX',
+          amount: orderData.amount,
+          currency: orderData.currency || 'INR',
+          name: 'Local Event Bulletin',
+          description: `Tickets for ${event.title}`,
+          order_id: orderData.order_id,
+          prefill: {
+            name: user?.name || '',
+            email: user?.email || '',
+            contact: user?.phone || '',
+          },
+          theme: {
+            color: '#5B4BFF',
+          },
+          handler: async function (response) {
+            try {
+              setLoading(true);
+              const verifyRes = await axiosClient.post(`/api/events/${event.id}/verify-razorpay-payment`, {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                ticket_quantity: quantity,
+              });
+
+              if (onRsvpSuccess) {
+                onRsvpSuccess(event.id, verifyRes.data.event.rsvp_count, verifyRes.data.ticket_numbers);
+              }
+
+              // Green Success Popup
+              await Swal.fire({
+                title: 'Payment Successful! 🎉',
+                text: `Payment verified! Ticket pass #${verifyRes.data.ticket_numbers.join(', #')} confirmed.`,
+                icon: 'success',
+                confirmButtonColor: '#10B981',
+                confirmButtonText: 'View My Bookings 🎟️',
+                customClass: {
+                  popup: 'rounded-3xl p-6 font-sans',
+                  confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md shadow-emerald-500/25',
+                },
+              });
+
+              onClose();
+              navigate('/my-bookings');
+            } catch (vErr) {
+              console.error('Payment verification failed:', vErr);
+              setError(vErr.response?.data?.error || 'Payment verification failed.');
+            } finally {
+              setLoading(false);
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setLoading(false);
+            },
+          },
+        };
+
+        const razorpayInstance = new window.Razorpay(options);
+        razorpayInstance.open();
       }
-      onClose();
     } catch (err) {
-      console.error('Registration failed:', err);
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
-    } finally {
+      console.error('Registration/Payment error:', err);
+      setError(err.response?.data?.error || 'Booking request failed. Please try again.');
       setLoading(false);
     }
   };
@@ -124,7 +257,7 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleBooking} className="space-y-6">
           {/* Ticket Quantity Selection */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -134,7 +267,7 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
               </span>
             </div>
 
-            <div className="flex items-center justify-between bg-[#F4F3F8] border border-[#E8E7EF] rounded-2xl p-3">
+            <div className="flex items-center justify-between bg-[#F4F3F8] border border-[#E8E7EF] rounded-2xl p-3 mb-4">
               <button
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -160,9 +293,25 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
                 +
               </button>
             </div>
+
+            {/* Price Calculation Summary */}
+            <div className="bg-[#EEF2FF] border border-[#C7D2FE] rounded-2xl p-4 flex items-center justify-between text-xs">
+              <div>
+                <span className="text-[#68677A] block">Ticket Price</span>
+                <span className="font-bold text-[#11112A] text-sm">
+                  {ticketPrice > 0 ? `₹${ticketPrice} / ticket` : 'FREE'}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[#68677A] block">Total Payable</span>
+                <span className="font-black text-[#4F46E5] text-base">
+                  {totalPrice > 0 ? `₹${totalPrice}` : '₹0 (FREE)'}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Registration Summary & Action */}
+          {/* Registration & Payment Action Button */}
           <div className="pt-2 border-t border-[#F0EFF6] flex items-center justify-between gap-3">
             <button
               type="button"
@@ -177,8 +326,14 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
               disabled={loading || remainingTickets === 0}
               className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] active:bg-[#3F2FD1] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 disabled:opacity-50 flex items-center gap-2"
             >
-              <span>{loading ? '⏳' : '🙌'}</span>
-              <span>{loading ? 'Confirming...' : `Confirm Registration (${quantity} ${quantity === 1 ? 'Ticket' : 'Tickets'})`}</span>
+              <span>{loading ? '⏳' : totalPrice > 0 ? '💳' : '🙌'}</span>
+              <span>
+                {loading
+                  ? 'Processing...'
+                  : totalPrice > 0
+                  ? `Pay ₹${totalPrice} via Razorpay`
+                  : `Confirm Registration (${quantity} ${quantity === 1 ? 'Ticket' : 'Tickets'})`}
+              </span>
             </button>
           </div>
         </form>
