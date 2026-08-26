@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
 import InvoiceModal from './InvoiceModal';
+import { sendEmailJsInvoice } from '../utils/emailjsHelper';
 
 function formatEventDate(dateString) {
   if (!dateString) return '';
@@ -148,6 +149,23 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
 
               if (onRsvpSuccess) {
                 onRsvpSuccess(event.id, verifyRes.data.event.rsvp_count, verifyRes.data.ticket_numbers);
+              }
+
+              // Dispatch EmailJS invoice email
+              if (user?.email) {
+                sendEmailJsInvoice({
+                  to_name: user?.name || 'Valued Customer',
+                  to_email: user.email,
+                  event_name: event.title,
+                  event_date: formatEventDate(event.event_datetime),
+                  event_location: `${event.location}, ${event.neighborhood || ''}, ${event.city || ''}`,
+                  ticket_type: `Entry Pass (#${verifyRes.data.ticket_numbers.join(', #')})`,
+                  quantity: quantity,
+                  amount: (event.ticket_price * quantity).toFixed(2),
+                  payment_id: response.razorpay_payment_id,
+                  order_id: response.razorpay_order_id,
+                  payment_date: new Date().toLocaleDateString(),
+                });
               }
 
               // Green Success Popup
