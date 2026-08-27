@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
 import LocationMapPicker from './LocationMapPicker';
+import CustomDateTimePicker from './CustomDateTimePicker';
 import { forwardGeocode } from '../utils/mapGeocodingHelper';
 import {
   fetchCountriesFromApi,
@@ -456,13 +457,11 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
 
             <div>
               <label className="block text-xs font-semibold text-[#0F172A] mb-1.5">Date & Time *</label>
-              <input
-                type="datetime-local"
-                required
-                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
+              <CustomDateTimePicker
                 value={eventDatetime}
-                onChange={(e) => setEventDatetime(e.target.value)}
-                className="w-full bg-[#F1F5F9] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
+                onChange={(val) => setEventDatetime(val)}
+                minDate={new Date()}
+                required
               />
             </div>
 

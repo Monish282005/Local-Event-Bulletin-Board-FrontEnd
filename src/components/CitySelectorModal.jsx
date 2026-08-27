@@ -58,8 +58,7 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
         {/* Modal Header */}
         <div className="mb-6">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1F5F9] text-[#0F172A] border border-[#E2E8F0] text-xs font-bold mb-2">
-            <span>📍</span>
-            <span>BookMyShow Location Selector</span>
+            <span>Location Selector</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-[#11112A] tracking-tight">
             Select Your City
@@ -115,11 +114,10 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
                     onSelectCity(c.name);
                     onClose();
                   }}
-                  className={`p-3.5 rounded-2xl border text-left transition flex items-center gap-3 cursor-pointer ${
-                    isSelected
-                      ? 'bg-[#F1EEFF] border-[#5B4BFF] text-[#5B4BFF] font-bold shadow-xs'
-                      : 'bg-white hover:bg-[#F4F3F8] border-[#E8E7EF] text-[#11112A] font-semibold'
-                  }`}
+                  className={`p-3.5 rounded-2xl border text-left transition flex items-center gap-3 cursor-pointer ${isSelected
+                    ? 'bg-[#F1EEFF] border-[#5B4BFF] text-[#5B4BFF] font-bold shadow-xs'
+                    : 'bg-white hover:bg-[#F4F3F8] border-[#E8E7EF] text-[#11112A] font-semibold'
+                    }`}
                 >
                   <span className="text-xl">{c.icon}</span>
                   <div className="min-w-0">
