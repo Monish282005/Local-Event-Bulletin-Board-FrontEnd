@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { X, MapPin, Building2, Layers, ExternalLink, Globe } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { forwardGeocode } from '../utils/mapGeocodingHelper';
@@ -28,7 +29,7 @@ const MAP_TILES = {
 export default function EventMapModal({ isOpen, onClose, event }) {
   const [coords, setCoords] = useState(
     event?.latitude && event?.longitude
-      ? { lat: event.latitude, lng: event.longitude }
+      ? { lat: parseFloat(event.latitude), lng: parseFloat(event.longitude) }
       : null
   );
   const [loading, setLoading] = useState(!coords);
@@ -58,7 +59,7 @@ export default function EventMapModal({ isOpen, onClose, event }) {
       if (!isOpen || !event) return;
 
       if (event?.latitude && event?.longitude) {
-        setCoords({ lat: event.latitude, lng: event.longitude });
+        setCoords({ lat: parseFloat(event.latitude), lng: parseFloat(event.longitude) });
         setLoading(false);
         return;
       }
@@ -77,9 +78,9 @@ export default function EventMapModal({ isOpen, onClose, event }) {
 
       if (isMounted) {
         if (results && results.length > 0) {
-          setCoords({ lat: results[0].lat, lng: results[0].lng });
+          setCoords({ lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lng) });
         } else {
-          setCoords({ lat: 12.9716, lng: 77.5946 });
+          setCoords({ lat: 11.0168, lng: 76.9558 });
         }
         setLoading(false);
       }
@@ -107,7 +108,14 @@ export default function EventMapModal({ isOpen, onClose, event }) {
       baseTileRef.current = L.tileLayer(config.url, { maxZoom: 19 }).addTo(map);
       labelsTileRef.current = L.tileLayer(config.labelsUrl, { maxZoom: 19, pane: 'markerPane' }).addTo(map);
 
-      L.marker([coords.lat, coords.lng]).addTo(map);
+      // Custom popup marker
+      const marker = L.marker([coords.lat, coords.lng]).addTo(map);
+      marker.bindPopup(`
+        <div style="font-family: sans-serif; padding: 4px;">
+          <b style="font-size: 13px; color: #0F172A;">${event.title}</b><br/>
+          <span style="font-size: 11px; color: #64748B;">${event.location}</span>
+        </div>
+      `).openPopup();
 
       mapInstanceRef.current = map;
 
@@ -163,80 +171,84 @@ export default function EventMapModal({ isOpen, onClose, event }) {
       )}`;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] flex flex-col font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto font-sans">
+      <div className="bg-white border border-[#E2E8F0] rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative my-auto max-h-[90vh] flex flex-col font-sans">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-[#68677A] hover:text-[#11112A] w-9 h-9 rounded-full bg-[#F4F3F8] hover:bg-[#E8E7EF] flex items-center justify-center transition font-bold text-sm z-20"
+          className="absolute top-5 right-5 text-[#64748B] hover:text-[#0F172A] w-8 h-8 rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] flex items-center justify-center transition font-bold text-xs z-20 cursor-pointer"
         >
-          ✕
+          <X className="w-4 h-4" />
         </button>
 
         {/* Modal Header */}
         <div className="mb-4 pr-10">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1.5">
             <CategoryBadge category={event.category} />
-            <span className="text-xs font-bold text-[#5B4BFF] bg-[#EEF2FF] px-2.5 py-0.5 rounded-full border border-[#C7D2FE]">
-              📍 Venue Satellite Map
+            <span className="text-xs font-bold text-[#0F172A] bg-[#F1F5F9] px-2.5 py-0.5 rounded-full border border-[#E2E8F0] flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span>Marked Location Pin</span>
             </span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-black text-[#11112A] tracking-tight line-clamp-1">
+          <h2 className="text-xl sm:text-2xl font-black text-[#0F172A] tracking-tight line-clamp-1">
             {event.title}
           </h2>
 
-          <p className="text-xs sm:text-sm text-[#68677A] font-medium mt-1 truncate">
-            🏢 {event.location}, {event.city}, {event.state}, {event.country}
+          <p className="text-xs sm:text-sm text-[#64748B] font-bold mt-1 truncate flex items-center gap-1">
+            <Building2 className="w-3.5 h-3.5 text-[#64748B]" />
+            <span>{event.location}, {event.city}, {event.state}, {event.country}</span>
           </p>
         </div>
 
         {/* Layer Toggle Bar */}
         <div className="flex items-center justify-between gap-2 mb-3">
-          <span className="text-xs font-bold text-[#11112A] flex items-center gap-1.5">
-            <span>🗺️</span>
-            <span>Interactive Venue Location</span>
+          <span className="text-xs font-bold text-[#0F172A] flex items-center gap-1.5">
+            <MapPin className="w-4 h-4 text-[#2563EB]" />
+            <span>Marked Venue Location</span>
           </span>
 
           <button
             type="button"
             onClick={toggleMapLayer}
-            className="text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 px-3 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-md"
+            className="text-xs font-bold text-white bg-[#0F172A] hover:bg-slate-800 px-3 py-1.5 rounded-full transition flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
-            <span>{mapType === 'satellite' ? '🗺️ Switch to Street View' : '🛰️ Switch to Hybrid Satellite'}</span>
+            <Layers className="w-3.5 h-3.5" />
+            <span>{mapType === 'satellite' ? 'Switch to Street View' : 'Switch to Satellite'}</span>
           </button>
         </div>
 
         {/* Map Canvas */}
-        <div className="relative w-full min-h-[360px] rounded-2xl overflow-hidden border border-[#E8E7EF] bg-[#F4F3F8] shadow-inner mb-4">
+        <div className="relative w-full min-h-[360px] rounded-2xl overflow-hidden border border-[#E2E8F0] bg-[#F1F5F9] shadow-inner mb-4">
           <div ref={mapContainerRef} style={{ height: '360px', width: '100%', minHeight: '360px' }} className="z-10 relative" />
 
           {loading && (
-            <div className="absolute inset-0 z-20 bg-white/70 backdrop-blur-xs flex items-center justify-center text-xs font-bold text-[#5B4BFF]">
-              <div className="bg-white px-5 py-2.5 rounded-full border border-[#E8E7EF] shadow-xl flex items-center gap-2">
+            <div className="absolute inset-0 z-20 bg-white/70 backdrop-blur-xs flex items-center justify-center text-xs font-bold text-[#2563EB]">
+              <div className="bg-white px-5 py-2.5 rounded-full border border-[#E2E8F0] shadow-xl flex items-center gap-2">
                 <span className="animate-spin">⏳</span>
-                <span>Locating venue on satellite map...</span>
+                <span>Locating venue on map...</span>
               </div>
             </div>
           )}
 
           {/* Map Mode Badge */}
-          <div className="absolute top-3 left-3 z-[400] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#E8E7EF] shadow-md text-[11px] font-bold text-[#11112A]">
-            {mapType === 'satellite' ? '🛰️ Hybrid Satellite View' : '🗺️ Street Map View'}
+          <div className="absolute top-3 left-3 z-[400] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#E2E8F0] shadow-md text-[11px] font-bold text-[#0F172A] flex items-center gap-1">
+            <Globe className="w-3 h-3 text-[#2563EB]" />
+            <span>{mapType === 'satellite' ? 'Hybrid Satellite View' : 'Street Map View'}</span>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-2 border-t border-[#F0EFF6]">
-          <span className="text-xs text-[#68677A] font-medium hidden sm:inline">
-            Click markers or drag map canvas to explore surround area.
+        <div className="flex items-center justify-between pt-2 border-t border-[#F1F5F9] flex-wrap gap-2">
+          <span className="text-xs text-[#64748B] font-bold hidden sm:inline">
+            Interactive map centered on marked event location.
           </span>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-full border border-[#E8E7EF] text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] font-semibold text-xs transition"
+              className="px-4 py-2 rounded-full border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] font-bold text-xs transition cursor-pointer"
             >
               Close
             </button>
@@ -245,9 +257,9 @@ export default function EventMapModal({ isOpen, onClose, event }) {
               href={googleMapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-5 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 flex items-center gap-1.5"
+              className="px-5 py-2 rounded-full bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-extrabold text-xs transition shadow-md shadow-blue-500/20 flex items-center gap-1.5 cursor-pointer"
             >
-              <span>🌐</span>
+              <ExternalLink className="w-3.5 h-3.5" />
               <span>Open in Google Maps</span>
             </a>
           </div>

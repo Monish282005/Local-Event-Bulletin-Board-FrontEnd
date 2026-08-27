@@ -42,9 +42,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #0F0F14;
+  background: #CBD5E1;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #333340;
+  background: #94A3B8;
 }

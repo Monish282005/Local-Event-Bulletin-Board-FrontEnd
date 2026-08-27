@@ -46,13 +46,13 @@ export function AuthProvider({ children }) {
       text: 'You must be signed in to reserve tickets for this event. Would you like to sign in or create an account now?',
       icon: 'info',
       showCancelButton: true,
-      confirmButtonColor: '#5B4BFF',
+      confirmButtonColor: '#0F172A',
       cancelButtonColor: '#68677A',
       confirmButtonText: 'Sign In / Register',
       cancelButtonText: 'Cancel',
       customClass: {
         popup: 'rounded-3xl p-6 font-sans',
-        confirmButton: 'px-5 py-2.5 rounded-full text-xs font-bold shadow-md shadow-[#5B4BFF]/25',
+        confirmButton: 'px-5 py-2.5 rounded-full text-xs font-bold shadow-md',
         cancelButton: 'px-5 py-2.5 rounded-full text-xs font-bold',
       },
     }).then((result) => {

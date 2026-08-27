@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { User, MapPin, Phone, Mail, Calendar, Ticket, Zap, CheckCircle2, Save, LogOut, ShieldCheck } from 'lucide-react';
+import PhoneInputWithCountry from '../components/PhoneInputWithCountry';
 import Navbar from '../components/Navbar';
 import CitySelectorModal from '../components/CitySelectorModal';
 import axiosClient from '../api/axiosClient';
@@ -253,13 +254,11 @@ export default function ProfilePage() {
 
               <div>
                 <label className="block text-xs font-bold text-[#0F0F14] mb-2">Mobile Phone Number *</label>
-                <input
-                  type="tel"
-                  required
+                <PhoneInputWithCountry
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+91 98765 43210"
-                  className="w-full bg-[#FAF9FC] border border-[#E8E7EF] rounded-full px-4 py-3 text-sm font-bold text-[#0F0F14] focus:bg-white focus:outline-none focus:border-[#0F0F14] transition"
+                  onChange={(fullVal) => setPhone(fullVal)}
+                  selectedCountryName={country}
+                  placeholder="Enter mobile phone number"
                 />
               </div>
             </div>

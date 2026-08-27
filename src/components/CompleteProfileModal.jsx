@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Swal from 'sweetalert2';
+import PhoneInputWithCountry from './PhoneInputWithCountry';
 import { useAuth } from '../context/AuthContext';
 import {
   fetchCountriesFromApi,
@@ -115,13 +116,13 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md overflow-y-auto">
       <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto text-[#11112A] animate-fadeIn">
         <div className="text-center mb-6">
-          <div className="w-14 h-14 bg-[#5B4BFF]/10 text-[#5B4BFF] rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3">
+          <div className="w-14 h-14 bg-[#F1F5F9] text-[#0F172A] border border-[#E2E8F0] rounded-2xl flex items-center justify-center text-2xl mx-auto mb-3 shadow-xs">
             📱
           </div>
           <h2 className="text-2xl font-extrabold text-[#11112A] mb-1">
             Complete Your Profile *
           </h2>
-          <p className="text-[#68677A] text-xs leading-relaxed max-w-xs mx-auto">
+          <p className="text-[#68677A] text-xs leading-relaxed max-w-xs mx-auto font-medium">
             Welcome <span className="font-bold text-[#11112A]">{user.name}</span>! Google Sign-In succeeded. You must complete your mobile phone number and select your home location to continue.
           </p>
         </div>
@@ -137,17 +138,12 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
             <label className="block text-xs font-bold text-[#11112A] mb-1.5">
               Mobile Phone Number *
             </label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-2.5 text-base">📞</span>
-              <input
-                type="tel"
-                required
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 9876543210"
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
-              />
-            </div>
+            <PhoneInputWithCountry
+              value={phone}
+              onChange={(fullVal) => setPhone(fullVal)}
+              selectedCountryName={country}
+              placeholder="Enter mobile phone number"
+            />
           </div>
 
           <div className="pt-3 border-t border-[#F0EFF6] space-y-3">
@@ -166,7 +162,7 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
                   setDistrict('');
                   setCity('');
                 }}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               >
                 <option value="">Select Country *</option>
                 {countryOptions.map((c) => (
@@ -186,7 +182,7 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
                   setDistrict('');
                   setCity('');
                 }}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition disabled:opacity-50 font-bold"
               >
                 <option value="">Select State *</option>
                 {stateOptions.map((s) => (
@@ -205,7 +201,7 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
                   setDistrict(e.target.value);
                   setCity('');
                 }}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition disabled:opacity-50 font-bold"
               >
                 <option value="">Select District *</option>
                 {districtOptions.map((d) => (
@@ -222,7 +218,7 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 placeholder="Enter City (e.g. Bengaluru) *"
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-xs text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-xs text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               />
             </div>
           </div>
@@ -231,7 +227,7 @@ export default function CompleteProfileModal({ isOpen, onClose }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-bold text-sm py-3.5 px-4 rounded-xl transition shadow-md shadow-[#5B4BFF]/25 cursor-pointer disabled:opacity-50"
+              className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold text-sm py-3.5 px-4 rounded-xl transition shadow-md cursor-pointer disabled:opacity-50"
             >
               {loading ? 'Saving Profile...' : 'Save Profile & Continue'}
             </button>

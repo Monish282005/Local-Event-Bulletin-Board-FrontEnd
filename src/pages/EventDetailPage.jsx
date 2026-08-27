@@ -53,9 +53,21 @@ export default function EventDetailPage() {
     fetchEvent();
   }, [id]);
 
+  const isEventHost = !!(user && event && (user.id === event.created_by || user.id === event.creator?.id));
+
   const handleRsvpClick = () => {
     if (!user) {
       promptLoginForBooking(event);
+      return;
+    }
+    if (isEventHost) {
+      Swal.fire({
+        title: 'Event Host Notice 👑',
+        text: 'You are the creator and organizer of this event. Hosts cannot reserve tickets or register for their own events.',
+        icon: 'info',
+        confirmButtonColor: '#0F172A',
+        customClass: { popup: 'rounded-3xl p-6 font-sans' },
+      });
       return;
     }
     setIsRegistrationModalOpen(true);
@@ -180,7 +192,7 @@ export default function EventDetailPage() {
           {/* Host / Organizer Banner */}
           <div className="bg-white border border-[#E8E7EF] rounded-2xl p-4 flex items-center justify-between gap-3 mb-6 shadow-2xs">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#5B4BFF] to-[#8075FF] text-white flex items-center justify-center font-bold text-sm">
+              <div className="w-10 h-10 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-bold text-sm shadow-md">
                 {organizerName.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -190,7 +202,7 @@ export default function EventDetailPage() {
             </div>
             <a
               href={`mailto:${organizerEmail}`}
-              className="px-4 py-2 rounded-full bg-[#F1EEFF] text-[#5B4BFF] hover:bg-[#5B4BFF] hover:text-white text-xs font-bold transition flex items-center gap-1.5 border border-[#E0D9FF]"
+              className="px-4 py-2 rounded-full bg-[#F1F5F9] text-[#0F172A] hover:bg-[#E2E8F0] text-xs font-bold transition flex items-center gap-1.5 border border-[#E2E8F0] cursor-pointer"
             >
               <span>✉️</span>
               <span>Contact Host</span>
@@ -198,10 +210,10 @@ export default function EventDetailPage() {
           </div>
 
           {/* Date & Time Highlight Pill Card */}
-          <div className="bg-[#F1EEFF] border border-purple-100 rounded-2xl p-4 sm:p-5 mb-6 flex items-center gap-4">
+          <div className="bg-[#F8FAFC] border border-[#E2E8F0] rounded-2xl p-4 sm:p-5 mb-6 flex items-center gap-4">
             <span className="text-3xl">📅</span>
             <div>
-              <div className="text-xs font-bold text-[#5B4BFF] uppercase tracking-wider mb-0.5">Date & Time</div>
+              <div className="text-xs font-bold text-[#64748B] uppercase tracking-wider mb-0.5">Date & Time</div>
               <div className="text-base font-bold text-[#11112A]">{formatEventDate(event.event_datetime)}</div>
             </div>
           </div>
@@ -217,7 +229,7 @@ export default function EventDetailPage() {
           {/* Description */}
           <div className="mb-8">
             <h3 className="text-xs font-bold text-[#9291A0] uppercase tracking-wider mb-2">About This Event</h3>
-            <p className="text-[#68677A] text-sm sm:text-base leading-relaxed whitespace-pre-line bg-[#FAF9FC] p-5 rounded-2xl border border-[#E8E7EF]">
+            <p className="text-[#68677A] text-sm sm:text-base leading-relaxed whitespace-pre-line bg-[#FAF9FC] p-5 rounded-2xl border border-[#E8E8EF]">
               {event.description}
             </p>
           </div>
@@ -225,7 +237,23 @@ export default function EventDetailPage() {
           {/* Action Buttons Footer */}
           <div className="pt-6 border-t border-[#F0EFF6] flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              {isSoldOut ? (
+              {isEventHost ? (
+                <button
+                  onClick={() => {
+                    Swal.fire({
+                      title: 'Event Host Notice 👑',
+                      text: 'You are the creator and organizer of this event. Hosts cannot reserve tickets or register for their own events.',
+                      icon: 'info',
+                      confirmButtonColor: '#0F172A',
+                      customClass: { popup: 'rounded-3xl p-6 font-sans' },
+                    });
+                  }}
+                  className="px-6 py-2.5 rounded-full bg-slate-100 text-slate-700 font-extrabold text-xs sm:text-sm border border-slate-300 hover:bg-slate-200 transition cursor-pointer flex items-center gap-2"
+                >
+                  <span>👑</span>
+                  <span>You Are The Host</span>
+                </button>
+              ) : isSoldOut ? (
                 <button
                   disabled
                   className="px-6 py-2.5 rounded-full bg-slate-200 text-slate-500 font-semibold text-xs sm:text-sm cursor-not-allowed border border-slate-300"
@@ -235,7 +263,7 @@ export default function EventDetailPage() {
               ) : (
                 <button
                   onClick={handleRsvpClick}
-                  className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] active:bg-[#3F2FD1] text-white font-semibold text-xs sm:text-sm transition flex items-center gap-2 shadow-md shadow-[#5B4BFF]/20"
+                  className="px-6 py-2.5 rounded-full bg-[#0F172A] hover:bg-[#1E293B] active:scale-95 text-white font-extrabold text-xs sm:text-sm transition flex items-center gap-2 shadow-md cursor-pointer"
                 >
                   <span>🙌</span>
                   <span>I'm Going</span>
@@ -274,7 +302,7 @@ export default function EventDetailPage() {
         }}
       />
 
-      <footer className="border-t border-[#E8E7EF] bg-white py-8 text-center text-[#68677A] text-xs font-medium mt-16">
+      <footer className="border-t border-[#E8E7EF] py-8 text-center text-[#68677A] text-xs font-medium mt-16">
         <p>© 2026 Local Event Bulletin Board. Designed with visual polish & discovery layout.</p>
       </footer>
     </div>

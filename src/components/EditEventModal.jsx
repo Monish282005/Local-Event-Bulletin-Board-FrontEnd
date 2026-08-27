@@ -266,7 +266,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
         title: 'Missing Required Fields',
         text: errMsg,
         icon: 'warning',
-        confirmButtonColor: '#5B4BFF',
+        confirmButtonColor: '#0F172A',
         customClass: { popup: 'rounded-3xl p-6 font-sans' },
       });
       return;
@@ -281,7 +281,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
         title: 'Invalid Event Date',
         text: errMsg,
         icon: 'error',
-        confirmButtonColor: '#5B4BFF',
+        confirmButtonColor: '#0F172A',
         customClass: { popup: 'rounded-3xl p-6 font-sans' },
       });
       return;
@@ -326,11 +326,11 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
         title: 'Event Updated! ✨',
         text: `Your changes for "${updatedTitle}" have been saved successfully.`,
         icon: 'success',
-        confirmButtonColor: '#5B4BFF',
+        confirmButtonColor: '#0F172A',
         confirmButtonText: 'Done',
         customClass: {
           popup: 'rounded-3xl p-6 font-sans',
-          confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md shadow-[#5B4BFF]/25',
+          confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md',
         },
       });
     } catch (err) {
@@ -342,7 +342,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
         title: 'Error Updating Event',
         text: errMsg,
         icon: 'error',
-        confirmButtonColor: '#5B4BFF',
+        confirmButtonColor: '#0F172A',
         customClass: { popup: 'rounded-3xl p-6 font-sans' },
       });
     } finally {
@@ -351,19 +351,17 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
-      <div ref={modalContainerRef} className="bg-white border border-[#E8E7EF] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
-        {/* Close Button */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs font-sans overflow-y-auto">
+      <div ref={modalContainerRef} className="bg-white border border-[#E2E8F0] rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-[#68677A] hover:text-[#11112A] w-8 h-8 rounded-full bg-[#F4F3F8] hover:bg-[#E8E7EF] flex items-center justify-center transition font-bold"
+          className="absolute top-5 right-5 p-2 rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] transition cursor-pointer"
         >
           ✕
         </button>
 
-        {/* Modal Header */}
         <div className="mb-6">
-          <span className="inline-block text-xs font-extrabold text-[#5B4BFF] uppercase tracking-wider mb-1">
+          <span className="inline-block text-xs font-extrabold text-[#0F172A] uppercase tracking-wider mb-1">
             Edit Event Listing
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-[#11112A] tracking-tight">
@@ -385,7 +383,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
             />
           </div>
 
@@ -395,7 +393,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#5B4BFF] file:text-white hover:file:bg-[#4C3CE6] transition cursor-pointer"
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#0F172A] file:text-white hover:file:bg-[#1E293B] transition cursor-pointer"
             />
             {imageUrl && (
               <div className="mt-2 relative w-full h-36 rounded-2xl overflow-hidden border border-[#E8E7EF]">
@@ -417,7 +415,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -428,13 +426,14 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Date & Time *</label>
+              <label className="block text-xs font-semibold text-[#0F172A] mb-1.5">Date & Time *</label>
               <input
                 type="datetime-local"
                 required
+                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                 value={eventDatetime}
                 onChange={(e) => setEventDatetime(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F1F5F9] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               />
             </div>
 
@@ -446,7 +445,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
                 required
                 value={totalTickets}
                 onChange={(e) => setTotalTickets(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               />
             </div>
 
@@ -459,22 +458,21 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
                 required
                 value={ticketPrice}
                 onChange={(e) => setTicketPrice(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               />
             </div>
           </div>
 
-          {/* Interactive Map Picker Section */}
           <div className="pt-2 border-t border-[#F0EFF6] space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#5B4BFF] uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#0F172A] uppercase tracking-wider flex items-center gap-1.5">
                 <span>🗺️</span>
                 <span>Interactive Location Map Picker</span>
               </span>
               <button
                 type="button"
                 onClick={() => setShowMap(!showMap)}
-                className="text-xs font-semibold text-[#5B4BFF] hover:underline"
+                className="text-xs font-semibold text-[#0F172A] hover:underline"
               >
                 {showMap ? 'Hide Map ▲' : 'Show Map ▼'}
               </button>
@@ -490,9 +488,8 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
             )}
           </div>
 
-          {/* Cascading Structured Location Fields */}
           <div className="pt-2 border-t border-[#F0EFF6] space-y-3">
-            <span className="block text-xs font-bold text-[#5B4BFF] uppercase tracking-wider">Event Location Region</span>
+            <span className="block text-xs font-bold text-[#0F172A] uppercase tracking-wider">Event Location Region</span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -500,7 +497,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
                 <select
                   value={country}
                   onChange={handleCountryChange}
-                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
                 >
                   <option value="">Select Country</option>
                   {countryOptions.map((c) => (
@@ -515,7 +512,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
                   value={state}
                   onChange={handleStateChange}
                   disabled={!country}
-                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
+                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition disabled:opacity-50 font-bold"
                 >
                   <option value="">Select State</option>
                   {stateOptions.map((s) => (
@@ -532,7 +529,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
                   value={district}
                   onChange={handleDistrictChange}
                   disabled={!state}
-                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
+                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition disabled:opacity-50 font-bold"
                 >
                   <option value="">Select District</option>
                   {districtOptions.map((d) => (
@@ -553,7 +550,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
                   }}
                   disabled={!district}
                   placeholder="e.g. Indiranagar, Komarapalayam, Karutr"
-                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
+                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#0F172A] transition disabled:opacity-50 font-bold"
                 />
               </div>
             </div>
@@ -567,7 +564,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. Central Park Pavilion 3"
-              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
             />
           </div>
 
@@ -578,7 +575,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
             />
           </div>
 
@@ -591,7 +588,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
               type="checkbox"
               checked={allowCancellation}
               onChange={(e) => setAllowCancellation(e.target.checked)}
-              className="w-4 h-4 text-[#5B4BFF] rounded focus:ring-[#5B4BFF] border-[#E8E7EF] cursor-pointer"
+              className="w-4 h-4 accent-[#0F172A] cursor-pointer"
             />
           </div>
 
@@ -599,14 +596,14 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-full border border-[#E8E7EF] text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] font-semibold text-xs transition"
+              className="px-5 py-2.5 rounded-full border border-[#E8E7EF] text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] font-semibold text-xs transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 disabled:opacity-50"
+              className="px-6 py-2.5 rounded-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-extrabold text-xs transition shadow-md disabled:opacity-50 cursor-pointer"
             >
               {loading ? 'Saving Changes...' : 'Save Changes'}
             </button>
