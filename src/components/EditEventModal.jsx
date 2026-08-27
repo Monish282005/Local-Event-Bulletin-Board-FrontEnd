@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import Swal from 'sweetalert2';
 import axiosClient from '../api/axiosClient';
 import LocationMapPicker from './LocationMapPicker';
 import {
@@ -230,6 +231,14 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
     }
   };
 
+  const modalContainerRef = useRef(null);
+
+  const scrollModalToTop = () => {
+    if (modalContainerRef.current) {
+      modalContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   if (!isOpen || !event) return null;
 
   const handleSubmit = async (e) => {
@@ -250,13 +259,31 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
       !district ||
       !effectiveCity
     ) {
-      setError('All fields including country, state, district, and city are required.');
+      const errMsg = 'All fields including country, state, district, and city are required.';
+      setError(errMsg);
+      scrollModalToTop();
+      Swal.fire({
+        title: 'Missing Required Fields',
+        text: errMsg,
+        icon: 'warning',
+        confirmButtonColor: '#5B4BFF',
+        customClass: { popup: 'rounded-3xl p-6 font-sans' },
+      });
       return;
     }
 
     const selectedDate = new Date(eventDatetime);
     if (isNaN(selectedDate.getTime()) || selectedDate.getTime() <= Date.now()) {
-      setError('Event date & time must be in the future.');
+      const errMsg = 'Event date & time must be in the future. Please select a future date and time.';
+      setError(errMsg);
+      scrollModalToTop();
+      Swal.fire({
+        title: 'Invalid Event Date',
+        text: errMsg,
+        icon: 'error',
+        confirmButtonColor: '#5B4BFF',
+        customClass: { popup: 'rounded-3xl p-6 font-sans' },
+      });
       return;
     }
 
@@ -288,13 +315,36 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
         }
       }
 
+      const updatedTitle = title.trim();
+
       if (onEventUpdated) {
         onEventUpdated(response.data);
       }
       onClose();
+
+      Swal.fire({
+        title: 'Event Updated! ✨',
+        text: `Your changes for "${updatedTitle}" have been saved successfully.`,
+        icon: 'success',
+        confirmButtonColor: '#5B4BFF',
+        confirmButtonText: 'Done',
+        customClass: {
+          popup: 'rounded-3xl p-6 font-sans',
+          confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md shadow-[#5B4BFF]/25',
+        },
+      });
     } catch (err) {
       console.error('Failed to update event:', err);
-      setError(err.response?.data?.error || 'Failed to update event. Please try again.');
+      const errMsg = err.response?.data?.error || 'Failed to update event. Please try again.';
+      setError(errMsg);
+      scrollModalToTop();
+      Swal.fire({
+        title: 'Error Updating Event',
+        text: errMsg,
+        icon: 'error',
+        confirmButtonColor: '#5B4BFF',
+        customClass: { popup: 'rounded-3xl p-6 font-sans' },
+      });
     } finally {
       setLoading(false);
     }
@@ -302,7 +352,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
+      <div ref={modalContainerRef} className="bg-white border border-[#E8E7EF] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
