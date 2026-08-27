@@ -88,6 +88,7 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
   const organizerEmail = event.creator?.email || 'contact@localbulletin.com';
 
   const isHost = !!(user && (user.id === event.created_by || user.id === event.creator?.id));
+  const districtLocation = event.district || event.city || event.neighborhood || 'Local';
 
   const handleBooking = async (e) => {
     e.preventDefault();
