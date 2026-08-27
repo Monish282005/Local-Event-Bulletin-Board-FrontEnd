@@ -1,40 +1,42 @@
 import React from 'react';
+import { Dumbbell, Music, Utensils, Tag, Compass } from 'lucide-react';
 
 export const CATEGORY_CONFIG = {
   sports: {
     label: 'Sports',
-    icon: '⚽',
-    colorClass: 'bg-blue-50 text-blue-600 border-blue-200/70 hover:bg-blue-100/80',
-    activeClass: 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20',
+    icon: Dumbbell,
+    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
+    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
   },
   music: {
     label: 'Music',
-    icon: '🎵',
-    colorClass: 'bg-purple-50 text-purple-600 border-purple-200/70 hover:bg-purple-100/80',
-    activeClass: 'bg-purple-600 text-white border-purple-600 shadow-md shadow-purple-500/20',
+    icon: Music,
+    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
+    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
   },
   food: {
     label: 'Food & Drink',
-    icon: '🍔',
-    colorClass: 'bg-amber-50 text-amber-700 border-amber-200/70 hover:bg-amber-100/80',
-    activeClass: 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-500/20',
+    icon: Utensils,
+    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
+    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
   },
   yard_sale: {
     label: 'Yard Sale',
-    icon: '🏷️',
-    colorClass: 'bg-emerald-50 text-emerald-700 border-emerald-200/70 hover:bg-emerald-100/80',
-    activeClass: 'bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-500/20',
+    icon: Tag,
+    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
+    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
   },
   other: {
     label: 'Other',
-    icon: '📌',
-    colorClass: 'bg-pink-50 text-pink-600 border-pink-200/70 hover:bg-pink-100/80',
-    activeClass: 'bg-pink-600 text-white border-pink-600 shadow-md shadow-pink-500/20',
+    icon: Compass,
+    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
+    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
   },
 };
 
 export default function CategoryBadge({ category, active = false, onClick, className = '' }) {
   const config = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.other;
+  const IconComponent = config.icon;
   const baseClass = active ? config.activeClass : config.colorClass;
 
   const Component = onClick ? 'button' : 'span';
@@ -43,11 +45,10 @@ export default function CategoryBadge({ category, active = false, onClick, class
     <Component
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition duration-150 ${baseClass} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition duration-150 whitespace-nowrap ${baseClass} ${className}`}
     >
-      <span>{config.icon}</span>
+      <IconComponent className="w-3.5 h-3.5" />
       <span>{config.label}</span>
     </Component>
   );
 }
-

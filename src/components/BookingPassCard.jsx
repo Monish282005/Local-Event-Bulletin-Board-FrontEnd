@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { MapPin, Calendar, Building2, Ticket, Mail, FileText, Trash2, Ban } from 'lucide-react';
 import Swal from 'sweetalert2';
 import CategoryBadge from './CategoryBadge';
 import axiosClient from '../api/axiosClient';
@@ -50,6 +51,9 @@ export default function BookingPassCard({ booking, onBookingCancelled }) {
   const organizerEmail = event.creator?.email || 'contact@localbulletin.com';
   const canCancel = event.allow_cancellation !== false;
 
+  // Single district/city location name (e.g. Coimbatore instead of Coimbatore, Coimbatore)
+  const districtLocation = event.district || event.city || event.neighborhood || 'Local';
+
   const handleCancelBooking = async () => {
     if (!canCancel || cancelling) return;
 
@@ -79,10 +83,10 @@ export default function BookingPassCard({ booking, onBookingCancelled }) {
         title: 'Pass Cancelled!',
         text: response.data.message || 'Your ticket booking pass has been cancelled and seats restored.',
         icon: 'success',
-        confirmButtonColor: '#5B4BFF',
+        confirmButtonColor: '#0F0F14',
         customClass: {
           popup: 'rounded-3xl p-6 font-sans',
-          confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md shadow-[#5B4BFF]/25',
+          confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md',
         },
       });
 
@@ -95,7 +99,7 @@ export default function BookingPassCard({ booking, onBookingCancelled }) {
         title: 'Cancellation Error',
         text: err.response?.data?.error || 'Failed to cancel booking pass.',
         icon: 'error',
-        confirmButtonColor: '#5B4BFF',
+        confirmButtonColor: '#0F0F14',
         customClass: {
           popup: 'rounded-3xl p-6 font-sans',
           confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold',
@@ -118,95 +122,92 @@ export default function BookingPassCard({ booking, onBookingCancelled }) {
 
   return (
     <>
-      <div className="bg-white border border-[#E8E7EF] hover:border-[#5B4BFF]/40 rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group">
+      <div className="bg-white border border-[#E8E7EF] rounded-3xl p-5 sm:p-6 shadow-xl shadow-slate-900/5 hover:shadow-2xl transition-all duration-300 flex flex-col font-sans relative group overflow-hidden space-y-4">
         {/* Top Header & Event Information */}
-        <div className="p-6">
-          <div className="flex items-center justify-between gap-2 mb-4">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-2">
             <CategoryBadge category={event.category} />
-            <span className="text-xs font-semibold text-[#68677A] bg-[#F4F3F8] px-3 py-1 rounded-full border border-[#E8E7EF]">
-              📍 {event.neighborhood}, {event.city}
+            <span className="text-xs font-bold text-[#0F0F14] bg-[#F4F3F8] px-3 py-1 rounded-full border border-[#E8E7EF] flex items-center gap-1 truncate max-w-[150px] whitespace-nowrap">
+              <MapPin className="w-3 h-3 text-[#0F0F14]" />
+              <span className="truncate">{districtLocation}</span>
             </span>
           </div>
 
-          <h3 className="text-xl font-bold text-[#11112A] group-hover:text-[#5B4BFF] transition leading-snug mb-3">
+          <h3 className="text-xl font-black text-[#0F0F14] hover:text-black transition duration-150 tracking-tight leading-snug truncate">
             <Link to={`/event/${event.id}`}>
               {event.title}
             </Link>
           </h3>
 
-          <div className="text-xs font-semibold text-[#5B4BFF] bg-[#F1EEFF] px-3 py-1 rounded-full inline-flex items-center gap-1.5 mb-4 border border-[#E0D9FF]">
-            <span>📅</span>
+          <div className="text-xs font-bold text-[#0F0F14] bg-[#F4F3F8] border border-[#E8E7EF] px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 whitespace-nowrap">
+            <Calendar className="w-3.5 h-3.5 text-[#0F0F14]" />
             <span>{formatEventDate(event.event_datetime)}</span>
           </div>
 
-          <p className="text-[#68677A] text-sm line-clamp-2 leading-relaxed mb-4">
+          <p className="text-[#555468] text-xs line-clamp-2 leading-relaxed font-medium">
             {event.description}
           </p>
 
-          <div className="text-xs text-[#9291A0] font-medium flex items-center gap-1.5 truncate">
-            <span>🏢</span>
+          <div className="text-xs text-[#68677A] font-bold flex items-center gap-1.5 truncate">
+            <Building2 className="w-3.5 h-3.5 text-[#68677A]" />
             <span className="truncate">Venue: {event.location}</span>
           </div>
         </div>
 
-        {/* Dotted Ticket Divider */}
-        <div className="relative flex items-center my-1">
-          <div className="w-4 h-8 bg-[#FAFAFC] rounded-r-full border-r border-t border-b border-[#E8E7EF] -ml-0.5"></div>
-          <div className="flex-1 border-b-2 border-dashed border-[#E8E7EF] mx-1"></div>
-          <div className="w-4 h-8 bg-[#FAFAFC] rounded-l-full border-l border-t border-b border-[#E8E7EF] -mr-0.5"></div>
-        </div>
-
-        {/* Ticket Pass Stub Footer */}
-        <div className="p-6 bg-[#FAF9FE] space-y-4">
+        {/* Compact Border Separator & Booking Stub (No whitespace gap stretch) */}
+        <div className="pt-4 border-t border-[#F0EFF6] space-y-3.5">
           {/* Organizer Banner */}
-          <div className="bg-white border border-[#E8E7EF] rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-2xs">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[#5B4BFF] to-[#8075FF] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+          <div className="bg-[#F4F3F8] border border-[#E8E7EF] rounded-2xl p-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-[#0F0F14] text-white flex items-center justify-center font-black text-xs flex-shrink-0">
                 {organizerName.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0">
-                <div className="text-[10px] text-[#9291A0] font-bold uppercase tracking-wider">Host / Organizer</div>
-                <h4 className="text-xs font-bold text-[#11112A] truncate">{organizerName}</h4>
+                <div className="text-[9px] text-[#68677A] font-extrabold uppercase tracking-wider">Host / Organizer</div>
+                <h4 className="text-xs font-bold text-[#0F0F14] truncate">{organizerName}</h4>
               </div>
             </div>
 
             <a
               href={`mailto:${organizerEmail}`}
-              className="px-3 py-1.5 rounded-full bg-[#F1EEFF] text-[#5B4BFF] hover:bg-[#5B4BFF] hover:text-white text-xs font-bold transition flex items-center gap-1 border border-[#E0D9FF] flex-shrink-0"
+              className="px-3 py-1.5 rounded-full bg-white text-[#0F0F14] hover:bg-slate-50 text-xs font-bold transition flex items-center gap-1 border border-[#E8E7EF] flex-shrink-0 cursor-pointer"
               title="Contact Event Host"
             >
-              <span>✉️</span>
+              <Mail className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Contact</span>
             </a>
           </div>
 
           {/* Ticket Badges & Summary */}
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+          <div className="flex items-center justify-between gap-2">
             <div>
-              <div className="text-[10px] font-extrabold text-[#5B4BFF] uppercase tracking-wider mb-1">
+              <div className="text-[9px] font-black text-[#68677A] uppercase tracking-wider mb-1">
                 Your Booking Status
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-extrabold text-[#11112A] bg-white border border-[#E8E7EF] px-3 py-1 rounded-xl shadow-xs">
-                  🎟️ {total_user_tickets} {total_user_tickets === 1 ? 'Ticket' : 'Tickets'} Reserved
+                <span className="text-xs font-extrabold text-white bg-[#0F0F14] px-3 py-1 rounded-full shadow-xs flex items-center gap-1.5">
+                  <Ticket className="w-3.5 h-3.5 text-white" />
+                  <span>{total_user_tickets} {total_user_tickets === 1 ? 'Ticket' : 'Tickets'} Reserved</span>
                 </span>
               </div>
             </div>
 
             <div className="text-right">
-              <div className="text-[10px] text-[#9291A0] font-medium">Booked on</div>
-              <div className="text-xs font-bold text-[#68677A]">{formatDate(booked_at)}</div>
+              <div className="text-[9px] text-[#68677A] font-bold uppercase">Booked on</div>
+              <div className="text-xs font-bold text-[#0F0F14]">{formatDate(booked_at)}</div>
             </div>
           </div>
 
-          {/* Individual Ticket Numbers */}
+          {/* Individual Ticket Numbers (Horizontal Scrollbar for Many Passes) */}
           <div>
-            <span className="text-[10px] text-[#9291A0] font-semibold block mb-1.5">Issued Ticket Pass IDs:</span>
-            <div className="flex flex-wrap gap-1.5">
+            <span className="text-[10px] text-[#68677A] font-bold block mb-1 uppercase tracking-wider">
+              Issued Ticket Pass IDs ({ticket_numbers.length}):
+            </span>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 pt-1 scrollbar-thin">
               {ticket_numbers.map((tNum) => (
                 <span
                   key={tNum}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold tracking-wide"
+                  className="px-2.5 py-1 rounded-full bg-[#F4F3F8] text-[#0F0F14] border border-[#E8E7EF] text-xs font-bold tracking-wide flex-shrink-0 whitespace-nowrap"
                 >
                   Pass #{tNum}
                 </span>
@@ -215,31 +216,31 @@ export default function BookingPassCard({ booking, onBookingCancelled }) {
           </div>
 
           {/* Invoice & Cancellation Action Buttons */}
-          <div className="pt-2 border-t border-[#E8E7EF]/80 flex flex-col sm:flex-row items-center gap-2">
+          <div className="pt-3 border-t border-[#F0EFF6] flex items-center gap-2">
             <button
               onClick={() => setShowInvoice(true)}
-              className="w-full sm:flex-1 py-2 rounded-xl bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-xs"
+              className="flex-1 py-2 rounded-full bg-[#0F0F14] hover:bg-black text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer whitespace-nowrap"
             >
-              <span>🧾</span>
-              <span>View / Download Invoice</span>
+              <FileText className="w-3.5 h-3.5" />
+              <span>View Invoice</span>
             </button>
 
             {canCancel ? (
               <button
                 onClick={handleCancelBooking}
                 disabled={cancelling}
-                className="w-full sm:w-auto px-3 py-2 rounded-xl bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border border-red-200 font-bold text-xs transition flex items-center justify-center gap-1 shadow-xs disabled:opacity-50"
+                className="px-4 py-2 rounded-full bg-white hover:bg-red-50 text-red-600 hover:text-red-700 border border-[#E8E7EF] hover:border-red-200 font-bold text-xs transition flex items-center justify-center gap-1 shadow-2xs disabled:opacity-50 cursor-pointer whitespace-nowrap"
                 title="Cancel Booking"
               >
-                <span>🗑️</span>
-                <span className="hidden sm:inline">{cancelling ? '...' : 'Cancel'}</span>
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{cancelling ? '...' : 'Cancel'}</span>
               </button>
             ) : (
               <div
-                className="w-full sm:w-auto px-3 py-2 rounded-xl bg-slate-100 text-slate-500 border border-slate-200 font-bold text-xs text-center flex items-center justify-center gap-1"
+                className="px-3 py-2 rounded-full bg-[#F4F3F8] text-[#68677A] border border-[#E8E7EF] font-bold text-xs text-center flex items-center justify-center gap-1"
                 title="Non-cancellable pass"
               >
-                <span>🚫</span>
+                <Ban className="w-3.5 h-3.5" />
               </div>
             )}
           </div>

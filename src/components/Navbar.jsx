@@ -1,110 +1,134 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { MapPin, LayoutDashboard, Calendar, Ticket, Plus, User, LogOut, ChevronDown } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export default function Navbar({ onCreateClick, selectedCity, onOpenCitySelector }) {
   const { user, isAuthenticated, logout, setIsAuthModalOpen } = useAuth();
 
   return (
-    <header className="border-b border-[#E8E7EF] bg-white/95 backdrop-blur-md sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-2">
+    <header className="sticky top-0 z-40 py-3 px-3 sm:px-6 max-w-7xl mx-auto">
+      <div className="bg-white border border-[#E8E7EF] rounded-full px-4 py-2.5 shadow-xl shadow-slate-900/10 flex items-center justify-between gap-3">
         {/* Brand Logo & Title */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 rounded-2xl bg-[#5B4BFF] text-white flex items-center justify-center font-black text-xl shadow-md shadow-[#5B4BFF]/30 group-hover:scale-105 transition-transform duration-200">
-            📍
-          </div>
-          <div className="hidden sm:block">
-            <h1 className="text-lg font-black text-[#11112A] tracking-tight group-hover:text-[#5B4BFF] transition leading-none">
-              LOCAL COMMUNITY
-            </h1>
-            <span className="text-[10px] font-bold text-[#68677A] uppercase tracking-wider leading-tight">
-              Event Bulletin Board
-            </span>
-          </div>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-full bg-[#0F0F14] text-white flex items-center justify-center font-black shadow-md group-hover:scale-105 transition-transform">
+              <MapPin className="w-4 h-4" />
+            </div>
+            <div className="hidden md:block">
+              <h1 className="text-sm font-black text-[#0F0F14] tracking-tight hover:text-black transition leading-none whitespace-nowrap">
+                LOCAL BULLETIN
+              </h1>
+              <span className="text-[9px] font-extrabold text-[#68677A] uppercase tracking-widest leading-none block mt-0.5 whitespace-nowrap">
+                Event Platform
+              </span>
+            </div>
+          </Link>
 
-        {/* BookMyShow Style Location / City Selector Button */}
-        {onOpenCitySelector && (
-          <button
-            onClick={onOpenCitySelector}
-            className="px-3.5 py-2 rounded-full bg-[#F4F3F8] hover:bg-[#EAE8F5] border border-[#E8E7EF] hover:border-[#5B4BFF] text-[#11112A] text-xs font-bold transition flex items-center gap-2 cursor-pointer shadow-2xs group"
-            title="Click to select your city or detect location"
+          {/* Location Selector Pill */}
+          {onOpenCitySelector && (
+            <button
+              onClick={onOpenCitySelector}
+              className="px-3.5 py-1.5 rounded-full bg-[#F4F3F8] hover:bg-[#EAE8F5] border border-[#E8E7EF] text-[#0F0F14] text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-2xs group whitespace-nowrap"
+              title="Click to select your city or detect location"
+            >
+              <MapPin className="w-3.5 h-3.5 text-[#0F0F14] group-hover:scale-110 transition-transform" />
+              <span className="max-w-[110px] sm:max-w-[160px] truncate">{selectedCity || 'Coimbatore'}</span>
+              <ChevronDown className="w-3 h-3 text-[#68677A] group-hover:text-[#0F0F14] transition" />
+            </button>
+          )}
+        </div>
+
+        {/* Black Nav Capsule Container */}
+        <div className="bg-[#0F0F14] p-1 rounded-full text-white shadow-xl border border-white/10 flex items-center gap-1">
+          <NavLink
+            to="/"
+            end
+            className={({ isActive }) =>
+              `px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
+                isActive
+                  ? 'bg-white text-[#0F0F14] shadow-md font-extrabold'
+                  : 'text-white/80 hover:text-white hover:bg-white/10'
+              }`
+            }
           >
-            <span className="text-[#5B4BFF] text-base group-hover:scale-110 transition-transform">📍</span>
-            <span className="max-w-[130px] sm:max-w-[180px] truncate">{selectedCity || 'Coimbatore'}</span>
-            <span className="text-[10px] text-[#68677A] group-hover:text-[#5B4BFF] transition">▼</span>
-          </button>
-        )}
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </NavLink>
 
-        {/* Navigation & User Actions */}
-        <div className="flex items-center gap-2 sm:gap-3">
           {isAuthenticated && (
             <>
               <NavLink
-                to="/my-bookings"
+                to="/my-events"
                 className={({ isActive }) =>
-                  `px-3.5 py-2 rounded-full font-semibold text-xs sm:text-sm transition flex items-center gap-1.5 border ${
+                  `px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#F1EEFF] text-[#5B4BFF] border-[#5B4BFF]'
-                      : 'bg-white text-[#68677A] hover:text-[#11112A] border-[#E8E7EF] hover:bg-[#F4F3F8]'
+                      ? 'bg-white text-[#0F0F14] shadow-md font-extrabold'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`
                 }
               >
-                <span>🎟️</span>
-                <span className="hidden md:inline">My Bookings</span>
+                <Calendar className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">My Events</span>
               </NavLink>
 
               <NavLink
-                to="/my-events"
+                to="/my-bookings"
                 className={({ isActive }) =>
-                  `px-3.5 py-2 rounded-full font-semibold text-xs sm:text-sm transition flex items-center gap-1.5 border ${
+                  `px-3.5 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#F1EEFF] text-[#5B4BFF] border-[#5B4BFF]'
-                      : 'bg-white text-[#68677A] hover:text-[#11112A] border-[#E8E7EF] hover:bg-[#F4F3F8]'
+                      ? 'bg-white text-[#0F0F14] shadow-md font-extrabold'
+                      : 'text-white/80 hover:text-white hover:bg-white/10'
                   }`
                 }
               >
-                <span>📅</span>
-                <span className="hidden md:inline">My Events</span>
+                <Ticket className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">Orders</span>
               </NavLink>
             </>
           )}
 
+          {/* Post Event Action inside Capsule */}
           <button
             onClick={onCreateClick}
-            className="px-4 py-2 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] active:bg-[#3F2FD1] text-white font-semibold text-xs sm:text-sm transition shadow-md shadow-[#5B4BFF]/20 flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white font-extrabold text-xs transition flex items-center gap-1 cursor-pointer whitespace-nowrap border border-white/15"
           >
-            <span>+</span>
+            <Plus className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Post Event</span>
           </button>
+        </div>
 
+        {/* Right Side User Avatar & Auth */}
+        <div className="flex items-center gap-2">
           {isAuthenticated ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <Link
                 to="/profile"
-                className="flex items-center gap-2 bg-[#F4F3F8] hover:bg-[#EAE8F5] border border-[#E8E7EF] hover:border-[#5B4BFF] rounded-full pl-3 pr-3 py-1.5 transition cursor-pointer group"
+                className="flex items-center gap-2 bg-[#F4F3F8] hover:bg-[#EAE8F5] border border-[#E8E7EF] rounded-full pl-2 pr-3 py-1 transition cursor-pointer group whitespace-nowrap"
                 title="View Profile Dashboard"
               >
-                <div className="w-6 h-6 rounded-full bg-[#5B4BFF] text-white flex items-center justify-center text-xs font-bold">
-                  {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                <div className="w-6 h-6 rounded-full bg-[#0F0F14] text-white flex items-center justify-center text-xs font-bold">
+                  {user?.name ? user.name.charAt(0).toUpperCase() : <User className="w-3 h-3" />}
                 </div>
-                <span className="text-xs font-bold text-[#11112A] group-hover:text-[#5B4BFF] transition hidden sm:inline">
+                <span className="text-xs font-bold text-[#0F0F14] group-hover:text-black transition hidden sm:inline max-w-[100px] truncate">
                   {user?.name}
                 </span>
               </Link>
+
               <button
                 onClick={logout}
-                className="px-3 py-1.5 rounded-full bg-white hover:bg-red-50 text-red-600 hover:text-red-700 text-xs font-bold transition border border-[#E8E7EF] cursor-pointer"
+                className="w-7 h-7 rounded-full bg-[#F4F3F8] hover:bg-red-100 text-red-600 hover:text-red-700 flex items-center justify-center transition border border-[#E8E7EF] cursor-pointer"
+                title="Logout"
               >
-                Logout
+                <LogOut className="w-3.5 h-3.5" />
               </button>
             </div>
           ) : (
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="px-4 py-2 rounded-full bg-[#F4F3F8] hover:bg-[#E8E7EF] text-[#11112A] font-semibold text-xs sm:text-sm transition border border-[#E8E7EF] cursor-pointer"
+              className="px-4 py-2 rounded-full bg-[#0F0F14] hover:bg-black text-white font-bold text-xs transition shadow-md cursor-pointer whitespace-nowrap"
             >
-              Log In
+              Sign In
             </button>
           )}
         </div>

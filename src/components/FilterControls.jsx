@@ -1,4 +1,5 @@
 import React from 'react';
+import { Search, Calendar, Zap, RotateCcw, X } from 'lucide-react';
 import CategoryFilterBar from './CategoryFilterBar';
 
 export default function FilterControls({
@@ -25,38 +26,40 @@ export default function FilterControls({
     (sort && sort !== 'datetime_asc');
 
   return (
-    <div className="mb-10 space-y-5 max-w-5xl mx-auto">
-      {/* Prominent Large Search Bar */}
+    <div className="mb-12 space-y-5 max-w-5xl mx-auto font-sans">
+      {/* Large Search Bar */}
       <div className="relative">
-        <div className="relative flex items-center bg-white border border-[#E8E7EF] rounded-2xl shadow-sm hover:shadow-md focus-within:shadow-lg focus-within:border-[#5B4BFF] transition duration-200 p-1.5 sm:p-2">
-          <span className="pl-4 text-[#68677A] text-lg select-none">
-            🔍
+        <div className="relative flex items-center bg-white border border-[#E8E7EF] rounded-full shadow-lg shadow-slate-900/5 hover:shadow-xl focus-within:shadow-2xl focus-within:border-[#0F0F14] transition duration-200 p-2">
+          <span className="pl-4 text-[#68677A] select-none">
+            <Search className="w-5 h-5 text-[#68677A]" />
           </span>
           <input
             type="text"
             value={neighborhoodInput}
             onChange={(e) => onNeighborhoodChange(e.target.value)}
-            placeholder="Search events by title, city, neighborhood, or keywords (e.g. Music, Bengaluru)..."
-            className="w-full pl-3 pr-4 py-2.5 bg-transparent text-sm sm:text-base text-[#11112A] placeholder-[#9291A0] focus:outline-none font-medium"
+            placeholder="Search events by title, city, neighborhood, or keywords (e.g. Music, Coimbatore)..."
+            className="w-full pl-3 pr-4 py-2.5 bg-transparent text-sm sm:text-base text-[#0F0F14] placeholder-[#9291A0] focus:outline-none font-bold truncate"
           />
           {neighborhoodInput && (
             <button
               onClick={() => onNeighborhoodChange('')}
-              className="mr-2 px-3 py-1 text-xs font-semibold text-[#68677A] hover:text-[#11112A] bg-[#F1EEFF] hover:bg-[#E4DEFF] rounded-full transition cursor-pointer"
+              className="mr-2 px-3.5 py-1 text-xs font-bold text-[#0F0F14] bg-[#F4F3F8] hover:bg-[#EAE8F5] rounded-full transition cursor-pointer flex items-center gap-1 whitespace-nowrap"
             >
-              Clear
+              <X className="w-3 h-3" />
+              <span>Clear</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Date Presets & Sorting Filter Bar */}
-      <div className="bg-white border border-[#E8E7EF] rounded-2xl p-4 shadow-xs space-y-4">
+      {/* Date Presets & Sorting Filter Bar (Solid White Container) */}
+      <div className="bg-white border border-[#E8E7EF] rounded-3xl p-5 shadow-lg shadow-slate-900/5 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* Date Filter Presets */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-bold text-[#11112A] mr-1 flex items-center gap-1">
-              <span>📅</span> Date:
+            <span className="text-xs font-black text-[#0F0F14] mr-1 flex items-center gap-1 uppercase tracking-wider whitespace-nowrap">
+              <Calendar className="w-3.5 h-3.5 text-[#0F0F14]" />
+              <span>Date:</span>
             </span>
 
             {[
@@ -65,17 +68,17 @@ export default function FilterControls({
               { id: 'tomorrow', label: 'Tomorrow' },
               { id: 'this_weekend', label: 'This Weekend' },
               { id: 'this_week', label: 'Next 7 Days' },
-              { id: 'custom', label: 'Custom Range 🗓️' },
+              { id: 'custom', label: 'Custom Range' },
             ].map((preset) => {
               const isActive = datePreset === preset.id || (!datePreset && preset.id === 'all');
               return (
                 <button
                   key={preset.id}
                   onClick={() => onDatePresetChange(preset.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition border cursor-pointer ${
+                  className={`px-3.5 py-2 rounded-full text-xs font-bold transition border cursor-pointer whitespace-nowrap ${
                     isActive
-                      ? 'bg-[#5B4BFF] text-white border-[#5B4BFF] shadow-xs'
-                      : 'bg-[#FAF9FC] text-[#68677A] hover:text-[#11112A] border-[#E8E7EF] hover:bg-[#F4F3F8]'
+                      ? 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md font-extrabold'
+                      : 'bg-white text-[#68677A] hover:text-[#0F0F14] border-[#E8E7EF] hover:bg-[#F4F3F8]'
                   }`}
                 >
                   {preset.label}
@@ -86,13 +89,14 @@ export default function FilterControls({
 
           {/* Sort By Filter */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs font-bold text-[#11112A] flex items-center gap-1">
-              <span>⚡</span> Sort:
+            <span className="text-xs font-black text-[#0F0F14] flex items-center gap-1 uppercase tracking-wider whitespace-nowrap">
+              <Zap className="w-3.5 h-3.5 text-[#0F0F14]" />
+              <span>Sort:</span>
             </span>
             <select
               value={sort || 'datetime_asc'}
               onChange={(e) => onSortChange(e.target.value)}
-              className="bg-[#FAF9FC] border border-[#E8E7EF] focus:border-[#5B4BFF] text-xs font-bold text-[#11112A] rounded-xl px-3 py-1.5 outline-none cursor-pointer"
+              className="bg-white border border-[#E8E7EF] focus:border-[#0F0F14] text-xs font-bold text-[#0F0F14] rounded-full px-4 py-2 outline-none cursor-pointer shadow-2xs whitespace-nowrap"
             >
               <option value="datetime_asc">Earliest Upcoming</option>
               <option value="datetime_desc">Furthest Date</option>
@@ -102,26 +106,26 @@ export default function FilterControls({
           </div>
         </div>
 
-        {/* Custom Date Range Pickers (Visible when custom is chosen) */}
+        {/* Custom Date Range Pickers */}
         {datePreset === 'custom' && (
-          <div className="pt-3 border-t border-[#F0EFF6] flex flex-wrap items-center gap-4 bg-[#FAF9FC] p-3 rounded-xl border border-[#E8E7EF]">
+          <div className="pt-3 border-t border-[#F0EFF6] flex flex-wrap items-center gap-4 bg-[#F4F3F8] p-3 rounded-2xl border border-[#E8E7EF]">
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-[#11112A]">From Date:</label>
+              <label className="text-xs font-bold text-[#0F0F14] whitespace-nowrap">From Date:</label>
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => onStartDateChange(e.target.value)}
-                className="bg-white border border-[#E8E7EF] focus:border-[#5B4BFF] rounded-lg px-3 py-1.5 text-xs text-[#11112A] outline-none"
+                className="bg-white border border-[#E8E7EF] focus:border-[#0F0F14] rounded-full px-3 py-1.5 text-xs text-[#0F0F14] font-bold outline-none"
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-xs font-bold text-[#11112A]">To Date:</label>
+              <label className="text-xs font-bold text-[#0F0F14] whitespace-nowrap">To Date:</label>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => onEndDateChange(e.target.value)}
-                className="bg-white border border-[#E8E7EF] focus:border-[#5B4BFF] rounded-lg px-3 py-1.5 text-xs text-[#11112A] outline-none"
+                className="bg-white border border-[#E8E7EF] focus:border-[#0F0F14] rounded-full px-3 py-1.5 text-xs text-[#0F0F14] font-bold outline-none"
               />
             </div>
           </div>
@@ -141,9 +145,9 @@ export default function FilterControls({
           <div className="flex justify-end pt-1 sm:pt-0 shrink-0">
             <button
               onClick={onClearFilters}
-              className="px-4 py-2 rounded-full bg-white hover:bg-slate-50 text-[#68677A] hover:text-[#11112A] text-xs font-bold border border-[#E8E7EF] hover:border-[#5B4BFF] transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+              className="px-4 py-2 rounded-full bg-white hover:bg-slate-50 text-[#0F0F14] text-xs font-extrabold border border-[#E8E7EF] hover:border-[#0F0F14] transition flex items-center gap-1.5 shadow-2xs cursor-pointer whitespace-nowrap"
             >
-              <span>↺</span>
+              <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset All Filters</span>
             </button>
           </div>

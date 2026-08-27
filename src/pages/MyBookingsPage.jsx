@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Ticket, ArrowLeft } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import BookingPassCard from '../components/BookingPassCard';
 import Pagination from '../components/Pagination';
@@ -54,54 +55,56 @@ export default function MyBookingsPage() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-[#FAF9FC] text-[#11112A] flex flex-col font-sans">
+    <div className="min-h-screen text-[#0F0F14] flex flex-col font-sans">
       <Navbar onCreateClick={handleCreateClick} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 flex-1 w-full">
         {/* Hero Banner */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F1EEFF] text-[#5B4BFF] text-xs font-bold mb-4 border border-[#E0D9FF]">
-            <span>🎟️</span>
+        <div className="mb-10 text-center font-sans">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F4F3F8] text-[#0F0F14] text-xs font-bold mb-4 border border-[#E8E7EF]">
+            <Ticket className="w-3.5 h-3.5 text-[#0F0F14]" />
             <span>Reserved Pass Management</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-[#11112A] tracking-tight mb-4 leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-black text-[#0F0F14] tracking-tight mb-3 leading-tight">
             My Booked Ticket Passes
           </h2>
-          <p className="text-[#68677A] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-[#68677A] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-bold">
             View all events you registered for with your issued ticket pass IDs.
           </p>
         </div>
 
         <div>
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-xl font-bold text-[#11112A]">
-              Your Reserved Event Passes ({myBookingsPagination?.total ?? myBookings.length})
+          <div className="mb-8 flex items-center justify-between flex-wrap gap-4 border-b border-[#E8E7EF] pb-4">
+            <h3 className="text-xl font-black text-[#0F0F14] flex items-center gap-2">
+              <Ticket className="w-5 h-5 text-[#0F0F14]" />
+              <span>Your Reserved Event Passes ({myBookingsPagination?.total ?? myBookings.length})</span>
             </h3>
             <Link
               to="/"
-              className="text-xs text-[#5B4BFF] hover:underline font-semibold flex items-center gap-1"
+              className="px-4 py-2 rounded-full bg-white hover:bg-slate-50 text-[#0F0F14] text-xs font-extrabold border border-[#E8E7EF] transition flex items-center gap-1.5 shadow-2xs"
             >
-              <span>←</span> Back to All Events
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to All Events</span>
             </Link>
           </div>
 
           {myBookings.length === 0 && !loading ? (
             <div className="bg-white border border-dashed border-[#D5D3E5] rounded-3xl p-12 text-center max-w-lg mx-auto my-8 shadow-xs">
-              <div className="text-4xl mb-3">🎟️</div>
-              <h4 className="text-lg font-bold text-[#11112A] mb-2">No Ticket Passes Reserved</h4>
-              <p className="text-[#68677A] text-xs sm:text-sm font-medium mb-6">
+              <Ticket className="w-10 h-10 text-[#68677A] mx-auto mb-3" />
+              <h4 className="text-lg font-bold text-[#0F0F14] mb-2">No Ticket Passes Reserved</h4>
+              <p className="text-[#68677A] text-xs sm:text-sm font-bold mb-6">
                 You haven't registered for any events yet. Explore upcoming community events to reserve your spot!
               </p>
               <Link
                 to="/"
-                className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white text-xs font-semibold transition shadow-md shadow-[#5B4BFF]/20 inline-block"
+                className="px-6 py-2.5 rounded-full bg-[#0F0F14] hover:bg-black text-white text-xs font-extrabold transition shadow-md inline-block"
               >
                 Browse Nearby Events
               </Link>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
                 {myBookings.map((b) => (
                   <BookingPassCard
                     key={b.event.id}
@@ -133,7 +136,7 @@ export default function MyBookingsPage() {
         onEventCreated={() => fetchMyBookings(1)}
       />
 
-      <footer className="border-t border-[#E8E7EF] bg-white py-8 text-center text-[#68677A] text-xs font-medium mt-16">
+      <footer className="border-t border-[#E8E7EF] py-8 text-center text-[#68677A] text-xs font-bold mt-16">
         <p>© 2026 Local Event Bulletin Board. Designed with visual polish & discovery layout.</p>
       </footer>
     </div>

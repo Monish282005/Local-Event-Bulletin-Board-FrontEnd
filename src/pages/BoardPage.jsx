@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MapPin, Search } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import FilterControls from '../components/FilterControls';
 import TieredEventBoard from '../components/TieredEventBoard';
@@ -221,7 +222,7 @@ export default function BoardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF9FC] text-[#11112A] flex flex-col font-sans">
+    <div className="min-h-screen text-[#11112A] flex flex-col font-sans">
       <Navbar
         onCreateClick={handleCreateClick}
         selectedCity={selectedCity || 'Detecting...'}
@@ -230,23 +231,23 @@ export default function BoardPage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {/* Hero Banner */}
-        <div className="mb-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F1EEFF] text-[#5B4BFF] text-xs font-bold mb-4 border border-[#E0D9FF]">
-            <span>📍</span>
+        <div className="mb-10 text-center font-sans">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F4F3F8] text-[#0F0F14] text-xs font-bold mb-4 border border-[#E8E7EF]">
+            <MapPin className="w-3.5 h-3.5 text-[#0F0F14]" />
             <span>
               {isDetectingLocation
                 ? 'Auto-detecting your location via GPS...'
                 : `Showing Events for ${selectedCity}`}
             </span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-black text-[#11112A] tracking-tight mb-4 leading-tight">
+          <h2 className="text-3xl sm:text-5xl font-black text-[#0F0F14] tracking-tight mb-4 leading-tight">
             {isDetectingLocation
               ? 'Finding Events Near You...'
               : user
               ? `Welcome, ${user.name}!`
               : `Top Picks in ${selectedCity}`}
           </h2>
-          <p className="text-[#68677A] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+          <p className="text-[#68677A] text-base sm:text-lg max-w-2xl mx-auto leading-relaxed font-bold">
             {isDetectingLocation
               ? 'Locating nearby community gatherings and top picks for your current location.'
               : user
@@ -276,13 +277,13 @@ export default function BoardPage() {
         {isFiltering ? (
           <div>
             <div className="flex items-center justify-between mb-6 pb-2 border-b border-[#E8E7EF]">
-              <h3 className="text-xl font-bold text-[#11112A] flex items-center gap-2">
-                <span>🔍</span>
+              <h3 className="text-xl font-black text-[#0F0F14] flex items-center gap-2">
+                <Search className="w-5 h-5 text-[#0F0F14]" />
                 <span>Filtered Results</span>
               </h3>
               <button
                 onClick={handleClearFilters}
-                className="text-xs text-[#5B4BFF] hover:underline font-semibold"
+                className="text-xs text-[#0F0F14] hover:underline font-extrabold"
               >
                 Clear all filters
               </button>
@@ -338,7 +339,7 @@ export default function BoardPage() {
         onSelectCity={handleSelectCity}
       />
 
-      <footer className="border-t border-[#E8E7EF] bg-white py-8 text-center text-[#68677A] text-xs font-medium mt-16">
+      <footer className="border-t border-[#E8E7EF] py-8 text-center text-[#68677A] text-xs font-medium mt-16">
         <p>© 2026 Local Event Bulletin Board. Connect with local communities near you.</p>
       </footer>
     </div>
