@@ -26,7 +26,7 @@ function formatDate(dateString) {
 }
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateProfile } = useAuth();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('settings'); // 'settings' | 'events' | 'bookings'
@@ -138,7 +138,7 @@ export default function ProfilePage() {
     }
 
     try {
-      const res = await axiosClient.put('/api/auth/me', {
+      await updateProfile({
         name: name.trim(),
         phone: phone.trim(),
         country: country.trim(),

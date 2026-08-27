@@ -121,7 +121,6 @@ export default function BoardPage() {
   };
 
   const fetchFlatEvents = async (neigh = debouncedNeighborhood, cat = selectedCategory, pageNum = flatPage, cityToUse = selectedCity) => {
-    if (!cityToUse) return;
     setLoading(true);
     setError(null);
     try {
@@ -129,6 +128,11 @@ export default function BoardPage() {
         page: pageNum,
         limit: 9,
       };
+
+      const hasSearchText = Boolean(neigh && neigh.trim());
+      if (!hasSearchText && cityToUse) {
+        params.city = cityToUse;
+      }
       if (neigh && neigh.trim()) params.search = neigh.trim();
       if (cat && cat.trim()) params.category = cat.trim();
       if (datePreset && datePreset !== 'all') params.datePreset = datePreset;

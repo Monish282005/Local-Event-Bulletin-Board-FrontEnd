@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import Swal from 'sweetalert2';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
 import LocationMapPicker from './LocationMapPicker';
@@ -221,6 +222,14 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
     reader.readAsDataURL(file);
   };
 
+  const modalContainerRef = useRef(null);
+
+  const scrollModalToTop = () => {
+    if (modalContainerRef.current) {
+      modalContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
@@ -242,14 +251,32 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
       !district ||
       !effectiveCity
     ) {
-      setError('All fields including country, state, district, and city are required.');
+      const errMsg = 'All fields including country, state, district, and city are required.';
+      setError(errMsg);
+      scrollModalToTop();
+      Swal.fire({
+        title: 'Missing Required Fields',
+        text: errMsg,
+        icon: 'warning',
+        confirmButtonColor: '#5B4BFF',
+        customClass: { popup: 'rounded-3xl p-6 font-sans' },
+      });
       return;
     }
 
     // Client-side future date validation
     const selectedDate = new Date(eventDatetime);
     if (isNaN(selectedDate.getTime()) || selectedDate.getTime() <= Date.now()) {
-      setError('Event date & time must be in the future.');
+      const errMsg = 'Event date & time must be in the future. Please select a future date and time.';
+      setError(errMsg);
+      scrollModalToTop();
+      Swal.fire({
+        title: 'Invalid Event Date',
+        text: errMsg,
+        icon: 'error',
+        confirmButtonColor: '#5B4BFF',
+        customClass: { popup: 'rounded-3xl p-6 font-sans' },
+      });
       return;
     }
 
@@ -299,6 +326,8 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
         }
       }
 
+      const createdTitle = title.trim();
+
       // Clear form
       setTitle('');
       setDescription('');
@@ -315,9 +344,30 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
         onEventCreated();
       }
       onClose();
+
+      Swal.fire({
+        title: 'Event Published! 🎉',
+        text: `Your event "${createdTitle}" has been published successfully and is now live for community members!`,
+        icon: 'success',
+        confirmButtonColor: '#5B4BFF',
+        confirmButtonText: 'Great!',
+        customClass: {
+          popup: 'rounded-3xl p-6 font-sans',
+          confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md shadow-[#5B4BFF]/25',
+        },
+      });
     } catch (err) {
       console.error('Failed to post event:', err);
-      setError(err.response?.data?.error || 'Failed to post event. Please try again.');
+      const errMsg = err.response?.data?.error || 'Failed to post event. Please try again.';
+      setError(errMsg);
+      scrollModalToTop();
+      Swal.fire({
+        title: 'Error Creating Event',
+        text: errMsg,
+        icon: 'error',
+        confirmButtonColor: '#5B4BFF',
+        customClass: { popup: 'rounded-3xl p-6 font-sans' },
+      });
     } finally {
       setLoading(false);
     }
@@ -325,7 +375,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
+      <div ref={modalContainerRef} className="bg-white border border-[#E8E7EF] rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
         {/* Close Button */}
         <button
           onClick={onClose}
