@@ -57,7 +57,7 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
 
         {/* Modal Header */}
         <div className="mb-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1EEFF] text-[#5B4BFF] text-xs font-bold mb-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1F5F9] text-[#0F172A] border border-[#E2E8F0] text-xs font-bold mb-2">
             <span>📍</span>
             <span>BookMyShow Location Selector</span>
           </div>
@@ -74,7 +74,7 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
           <button
             onClick={handleDetectLocation}
             disabled={detecting}
-            className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#5B4BFF] to-[#7B6DFF] hover:from-[#4C3CE6] hover:to-[#6B5DFF] active:scale-[0.99] text-white font-bold text-sm transition shadow-md shadow-[#5B4BFF]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+            className="w-full py-3.5 px-5 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] active:scale-[0.99] text-white font-bold text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
           >
             <span>{detecting ? '⏳' : '🎯'}</span>
             <span>{detecting ? 'Detecting your current location...' : 'Detect My Location (GPS / IP)'}</span>
@@ -86,7 +86,7 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
               placeholder="Search for your city (e.g. Coimbatore, Bengaluru, Mumbai)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-24 py-3.5 rounded-2xl bg-[#F4F3F8] border border-[#E8E7EF] text-[#11112A] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#5B4BFF] focus:bg-white transition"
+              className="w-full pl-11 pr-24 py-3.5 rounded-2xl bg-[#F4F3F8] border border-[#E8E7EF] text-[#11112A] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#0F172A] focus:bg-white transition"
             />
             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#68677A] text-base">🔍</span>
             {searchQuery.trim() && (

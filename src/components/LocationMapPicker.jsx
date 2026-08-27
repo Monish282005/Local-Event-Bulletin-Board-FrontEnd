@@ -220,14 +220,14 @@ export default function LocationMapPicker({
               }
             }}
             placeholder="🔍 Search city, landmark, or street on map..."
-            className="w-full pl-9 pr-20 py-2.5 rounded-xl border border-[#E8E7EF] text-xs font-medium text-[#11112A] bg-white focus:outline-none focus:border-[#5B4BFF] focus:ring-2 focus:ring-[#5B4BFF]/20 transition shadow-2xs"
+            className="w-full pl-9 pr-20 py-2.5 rounded-xl border border-[#E8E7EF] text-xs font-medium text-[#11112A] bg-white focus:outline-none focus:border-[#0F172A] focus:ring-2 focus:ring-[#0F172A]/20 transition shadow-2xs"
           />
           <span className="absolute left-3 top-2.5 text-xs text-[#68677A]">📍</span>
           <button
             type="button"
             onClick={handleSearchSubmit}
             disabled={isSearching}
-            className="absolute right-1.5 top-1.5 bottom-1.5 px-3 rounded-lg bg-[#5B4BFF] text-white text-[11px] font-bold hover:bg-[#4C3CE6] transition disabled:opacity-50"
+            className="absolute right-1.5 top-1.5 bottom-1.5 px-3 rounded-lg bg-[#0F172A] text-white text-[11px] font-bold hover:bg-[#1E293B] transition disabled:opacity-50"
           >
             {isSearching ? '...' : 'Search'}
           </button>
@@ -241,7 +241,7 @@ export default function LocationMapPicker({
                   onClick={() => handleSelectSearchResult(res)}
                   className="p-2.5 hover:bg-[#F4F3F8] cursor-pointer text-xs text-[#11112A] font-medium transition"
                 >
-                  <span className="font-bold text-[#5B4BFF] block">{res.city}, {res.district || res.state}</span>
+                  <span className="font-bold text-[#0F172A] block">{res.city}, {res.district || res.state}</span>
                   <span className="text-[11px] text-[#68677A] truncate block">{res.displayName}</span>
                 </div>
               ))}
@@ -254,7 +254,7 @@ export default function LocationMapPicker({
           <button
             type="button"
             onClick={toggleMapType}
-            className="px-3.5 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md"
+            className="px-3.5 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-md cursor-pointer"
           >
             <span>{mapType === 'satellite' ? '🗺️ Street View' : '🛰️ Hybrid Satellite'}</span>
           </button>
@@ -263,7 +263,7 @@ export default function LocationMapPicker({
           <button
             type="button"
             onClick={handleDetectCurrentLocation}
-            className="px-3.5 py-2.5 rounded-xl bg-[#EEF2FF] hover:bg-[#E0E7FF] text-[#4F46E5] border border-[#C7D2FE] text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs"
+            className="px-3.5 py-2.5 rounded-xl bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] border border-[#E2E8F0] text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
           >
             <span>🎯</span>
             <span>Detect GPS</span>
@@ -282,7 +282,7 @@ export default function LocationMapPicker({
         </div>
 
         {isGeocoding && (
-          <div className="absolute inset-0 z-[500] bg-white/60 backdrop-blur-xs flex items-center justify-center text-xs font-bold text-[#5B4BFF]">
+          <div className="absolute inset-0 z-[500] bg-white/60 backdrop-blur-xs flex items-center justify-center text-xs font-bold text-[#0F172A]">
             <div className="bg-white px-4 py-2 rounded-full border border-[#E8E7EF] shadow-xl flex items-center gap-2">
               <span className="animate-spin">⏳</span>
               <span>Fetching location & district details...</span>

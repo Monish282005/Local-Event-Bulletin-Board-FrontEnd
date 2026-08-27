@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Swal from 'sweetalert2';
+import PhoneInputWithCountry from './PhoneInputWithCountry';
 import { useAuth } from '../context/AuthContext';
 import {
   fetchCountriesFromApi,
@@ -143,11 +144,11 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
       title: 'Google Sign-In Error ⚠️',
       text: errMsg,
       icon: 'error',
-      confirmButtonColor: '#5B4BFF',
-      confirmButtonText: 'Try Again',
+      confirmButtonColor: '#0F172A',
+      confirmButtonText: 'Great!',
       customClass: {
         popup: 'rounded-3xl p-6 font-sans',
-        confirmButton: 'px-5 py-2.5 rounded-full text-xs font-bold shadow-md shadow-[#5B4BFF]/25',
+        confirmButton: 'px-5 py-2.5 rounded-full text-xs font-bold shadow-md',
       },
     });
   };
@@ -441,14 +442,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
 
           {isSignup && (
             <div>
-              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Mobile Phone Number *</label>
-              <input
-                type="tel"
-                required
+              <label className="block text-xs font-extrabold text-[#0F172A] mb-1.5">Mobile Phone Number *</label>
+              <PhoneInputWithCountry
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+91 9876543210"
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                onChange={(fullVal) => setPhone(fullVal)}
+                selectedCountryName={country}
+                placeholder="Enter mobile phone number"
               />
             </div>
           )}
@@ -546,7 +545,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-bold text-sm py-3 px-4 rounded-xl transition shadow-md shadow-[#5B4BFF]/25 cursor-pointer disabled:opacity-50"
+            className="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold text-sm py-3 px-4 rounded-xl transition shadow-md cursor-pointer disabled:opacity-50"
           >
             {loading ? (isSignup ? 'Creating Account...' : 'Logging In...') : isSignup ? 'Create Account' : 'Log In'}
           </button>
@@ -562,7 +561,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
                   setIsSignup(false);
                   setError(null);
                 }}
-                className="text-[#5B4BFF] font-bold hover:underline cursor-pointer"
+                className="text-[#0F172A] font-bold hover:underline cursor-pointer"
               >
                 Log In
               </button>
@@ -576,7 +575,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
                   setIsSignup(true);
                   setError(null);
                 }}
-                className="text-[#5B4BFF] font-bold hover:underline cursor-pointer"
+                className="text-[#0F172A] font-bold hover:underline cursor-pointer"
               >
                 Sign Up
               </button>

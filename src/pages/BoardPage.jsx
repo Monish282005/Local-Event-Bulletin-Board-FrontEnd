@@ -15,8 +15,13 @@ import { detectUserCity } from '../utils/locationHelper';
 export default function BoardPage() {
   const { promptLoginForBooking, user } = useAuth();
 
-  const [selectedCity, setSelectedCity] = useState(null);
-  const [isDetectingLocation, setIsDetectingLocation] = useState(true);
+  const [selectedCity, setSelectedCity] = useState(() => {
+    return localStorage.getItem('selectedCity') || sessionStorage.getItem('detectedCity') || null;
+  });
+  const [isDetectingLocation, setIsDetectingLocation] = useState(() => {
+    const cached = localStorage.getItem('selectedCity') || sessionStorage.getItem('detectedCity');
+    return !cached;
+  });
   const [isCityModalOpen, setIsCityModalOpen] = useState(false);
 
   const [feedData, setFeedData] = useState({ topPicks: [], stateEvents: [], countryEvents: [], userLocation: {}, pagination: {} });
@@ -41,36 +46,36 @@ export default function BoardPage() {
 
   useEffect(() => {
     let isMounted = true;
-    const initLocation = async () => {
-      const isPageReload = performance.getEntriesByType('navigation')?.[0]?.type === 'reload';
-      const hasDoneInitialDetection = sessionStorage.getItem('hasInitialDetectionDone');
-      const savedCity = localStorage.getItem('selectedCity') || user?.city;
 
-      // If NOT a page refresh AND initial detection was already performed in this session, reuse saved city!
-      if (!isPageReload && hasDoneInitialDetection && savedCity) {
+    const initLocation = async () => {
+      const cachedCity = localStorage.getItem('selectedCity') || sessionStorage.getItem('detectedCity');
+
+      // If city is already cached (e.g. from previous detection or route navigation), DO NOT re-detect!
+      if (cachedCity) {
         if (isMounted) {
-          setSelectedCity(savedCity);
+          setSelectedCity(cachedCity);
           setIsDetectingLocation(false);
         }
         return;
       }
 
-      // Run location detection on page refresh (F5) or initial page load
+      // Run location detection ONLY ONCE if no city is cached yet
       setIsDetectingLocation(true);
       try {
         const detected = await detectUserCity();
-        sessionStorage.setItem('hasInitialDetectionDone', 'true');
         if (isMounted) {
-          const finalCity = detected || user?.city || 'Bengaluru';
+          const finalCity = detected || user?.city || 'Coimbatore';
           setSelectedCity(finalCity);
           localStorage.setItem('selectedCity', finalCity);
+          sessionStorage.setItem('detectedCity', finalCity);
         }
       } catch (err) {
         console.warn('Location detection failed:', err);
-        sessionStorage.setItem('hasInitialDetectionDone', 'true');
         if (isMounted) {
-          const fallback = localStorage.getItem('selectedCity') || user?.city || 'Bengaluru';
+          const fallback = user?.city || 'Coimbatore';
           setSelectedCity(fallback);
+          localStorage.setItem('selectedCity', fallback);
+          sessionStorage.setItem('detectedCity', fallback);
         }
       } finally {
         if (isMounted) {
@@ -157,21 +162,15 @@ export default function BoardPage() {
     }
   };
 
-  const isFiltering = Boolean(
-    (debouncedNeighborhood && debouncedNeighborhood.trim()) ||
-    (selectedCategory && selectedCategory.trim()) ||
-    (datePreset && datePreset !== 'all') ||
-    startDate ||
-    endDate ||
-    (sort && sort !== 'datetime_asc')
-  );
+  // Only switch to flat search results view when there is active text in the search input box!
+  const isSearching = Boolean(debouncedNeighborhood && debouncedNeighborhood.trim());
 
   useEffect(() => {
     if (isDetectingLocation || !selectedCity) {
       return;
     }
 
-    if (isFiltering) {
+    if (isSearching) {
       setFlatPage(1);
       fetchFlatEvents(debouncedNeighborhood, selectedCategory, 1, selectedCity);
     } else {
@@ -214,7 +213,7 @@ export default function BoardPage() {
   };
 
   const refreshCurrentView = () => {
-    if (isFiltering) {
+    if (isSearching) {
       fetchFlatEvents(debouncedNeighborhood, selectedCategory, flatPage, selectedCity);
     } else {
       fetchFeed(selectedCategory, tierPages, selectedCity);
@@ -274,18 +273,18 @@ export default function BoardPage() {
         />
 
         {/* Main Content Area */}
-        {isFiltering ? (
+        {isSearching ? (
           <div>
             <div className="flex items-center justify-between mb-6 pb-2 border-b border-[#E8E7EF]">
               <h3 className="text-xl font-black text-[#0F0F14] flex items-center gap-2">
-                <Search className="w-5 h-5 text-[#0F0F14]" />
-                <span>Filtered Results</span>
+                <Search className="w-5 h-5 text-[#2563EB]" />
+                <span>Search Results for "{debouncedNeighborhood.trim()}"</span>
               </h3>
               <button
                 onClick={handleClearFilters}
-                className="text-xs text-[#0F0F14] hover:underline font-extrabold"
+                className="text-xs text-[#0F0F14] hover:underline font-extrabold cursor-pointer"
               >
-                Clear all filters
+                Clear search
               </button>
             </div>
 
@@ -293,7 +292,7 @@ export default function BoardPage() {
               events={flatEvents}
               loading={loading}
               error={error}
-              emptyMessage="No events found matching your criteria. Try adjusting your filters or date range."
+              emptyMessage={`No events found matching "${debouncedNeighborhood.trim()}". Try searching for another city, category, or keyword.`}
               onRetry={refreshCurrentView}
               onRsvpUpdate={refreshCurrentView}
               onEventUpdated={refreshCurrentView}
@@ -329,18 +328,17 @@ export default function BoardPage() {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onEventCreated={handleEventCreated}
-        defaultCity={selectedCity}
       />
 
       <CitySelectorModal
         isOpen={isCityModalOpen}
         onClose={() => setIsCityModalOpen(false)}
-        selectedCity={selectedCity}
         onSelectCity={handleSelectCity}
+        currentCity={selectedCity}
       />
 
-      <footer className="border-t border-[#E8E7EF] py-8 text-center text-[#68677A] text-xs font-medium mt-16">
-        <p>© 2026 Local Event Bulletin Board. Connect with local communities near you.</p>
+      <footer className="border-t border-[#E8E7EF] py-8 text-center text-[#68677A] text-xs font-bold mt-16">
+        <p>© 2026 Local Event Bulletin Board. Designed with visual polish & discovery layout.</p>
       </footer>
     </div>
   );

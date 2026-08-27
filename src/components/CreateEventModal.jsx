@@ -386,7 +386,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
 
         {/* Modal Header */}
         <div className="mb-6">
-          <span className="inline-block text-xs font-extrabold text-[#5B4BFF] uppercase tracking-wider mb-1">
+          <span className="inline-block text-xs font-extrabold text-black uppercase tracking-wider mb-1">
             Community Bulletin
           </span>
           <h2 className="text-2xl sm:text-3xl font-black text-[#11112A] tracking-tight">
@@ -412,7 +412,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Summer Community BBQ & Live Band"
-              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
             />
           </div>
 
@@ -422,7 +422,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#5B4BFF] file:text-white hover:file:bg-[#4C3CE6] transition cursor-pointer"
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] file:mr-3 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#0F172A] file:text-white hover:file:bg-[#1E293B] transition cursor-pointer"
             />
             {imageUrl && (
               <div className="mt-2 relative w-full h-36 rounded-2xl overflow-hidden border border-[#E8E7EF]">
@@ -444,7 +444,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E8EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat.value} value={cat.value}>
@@ -455,13 +455,14 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Date & Time *</label>
+              <label className="block text-xs font-semibold text-[#0F172A] mb-1.5">Date & Time *</label>
               <input
                 type="datetime-local"
                 required
+                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)}
                 value={eventDatetime}
                 onChange={(e) => setEventDatetime(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F1F5F9] border border-[#E2E8F0] rounded-xl px-3 py-2 text-xs text-[#0F172A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               />
             </div>
 
@@ -475,7 +476,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                 value={totalTickets}
                 onChange={(e) => setTotalTickets(e.target.value)}
                 placeholder="50"
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               />
             </div>
 
@@ -489,7 +490,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                 value={ticketPrice}
                 onChange={(e) => setTicketPrice(e.target.value)}
                 placeholder="0 (Free)"
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
               />
             </div>
           </div>
@@ -497,14 +498,14 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
           {/* Interactive Map Picker Section */}
           <div className="pt-2 border-t border-[#F0EFF6] space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-[#5B4BFF] uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xs font-bold text-[#0F172A] uppercase tracking-wider flex items-center gap-1.5">
                 <span>🗺️</span>
                 <span>Interactive Location Map Picker</span>
               </span>
               <button
                 type="button"
                 onClick={() => setShowMap(!showMap)}
-                className="text-xs font-semibold text-[#5B4BFF] hover:underline"
+                className="text-xs font-semibold text-[#0F172A] hover:underline"
               >
                 {showMap ? 'Hide Map ▲' : 'Show Map ▼'}
               </button>
@@ -522,7 +523,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
 
           {/* Cascading Structured Location Fields */}
           <div className="pt-2 border-t border-[#F0EFF6] space-y-3">
-            <span className="block text-xs font-bold text-[#5B4BFF] uppercase tracking-wider">Event Location Region</span>
+            <span className="block text-xs font-bold text-[#0F172A] uppercase tracking-wider">Event Location Region</span>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
@@ -530,7 +531,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                 <select
                   value={country}
                   onChange={handleCountryChange}
-                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
                 >
                   <option value="">Select Country</option>
                   {countryOptions.map((c) => (
@@ -545,7 +546,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                   value={state}
                   onChange={handleStateChange}
                   disabled={!country}
-                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
+                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition disabled:opacity-50 font-bold"
                 >
                   <option value="">Select State</option>
                   {stateOptions.map((s) => (
@@ -562,7 +563,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                   value={district}
                   onChange={handleDistrictChange}
                   disabled={!state}
-                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
+                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition disabled:opacity-50 font-bold"
                 >
                   <option value="">Select District</option>
                   {districtOptions.map((d) => (
@@ -583,7 +584,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                   }}
                   disabled={!district}
                   placeholder="e.g. Indiranagar, Komarapalayam, Karutr"
-                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition disabled:opacity-50"
+                  className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#0F172A] transition disabled:opacity-50 font-bold"
                 />
               </div>
             </div>
@@ -597,7 +598,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. Central Park Pavilion 3"
-              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
             />
           </div>
 
@@ -609,7 +610,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the event, parking instructions, entry details..."
-              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#5B4BFF] transition"
+              className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-4 py-2.5 text-sm text-[#11112A] placeholder-[#9291A0] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
             />
           </div>
 
@@ -620,7 +621,7 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
                 type="checkbox"
                 checked={allowCancellation}
                 onChange={(e) => setAllowCancellation(e.target.checked)}
-                className="w-4 h-4 rounded text-[#5B4BFF] focus:ring-[#5B4BFF]"
+                className="w-4 h-4 rounded accent-[#0F172A] cursor-pointer"
               />
               <span className="text-xs font-semibold text-[#11112A]">
                 Allow attendees to cancel their booking passes
@@ -633,14 +634,14 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-full border border-[#E8E7EF] text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] font-semibold text-xs transition"
+              className="px-5 py-2.5 rounded-full border border-[#E8E7EF] text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] font-semibold text-xs transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 disabled:opacity-50"
+              className="px-6 py-2.5 rounded-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-extrabold text-xs transition shadow-md disabled:opacity-50 cursor-pointer"
             >
               {loading ? 'Publishing Event...' : 'Publish Event'}
             </button>

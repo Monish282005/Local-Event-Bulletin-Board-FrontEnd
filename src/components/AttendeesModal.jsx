@@ -108,14 +108,14 @@ export default function AttendeesModal({ isOpen, onClose, eventId }) {
 
         {/* Modal Header */}
         <div className="mb-6 flex-shrink-0">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1EEFF] text-[#5B4BFF] text-xs font-bold mb-3 border border-[#E0D9FF]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1F5F9] text-[#0F172A] text-xs font-bold mb-3 border border-[#E2E8F0]">
             <span>🎟️</span>
             <span>Attendee Dashboard</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-[#11112A] mb-1 leading-tight truncate">
             {data?.title || 'Event Attendees'}
           </h2>
-          <p className="text-[#68677A] text-xs sm:text-sm">
+          <p className="text-[#68677A] text-xs sm:text-sm font-medium">
             Overview of members who claimed tickets for your event.
           </p>
         </div>
@@ -125,7 +125,7 @@ export default function AttendeesModal({ isOpen, onClose, eventId }) {
           <div className="grid grid-cols-3 gap-3 mb-4 text-center">
             <div className="bg-white border border-[#E8E7EF] p-2.5 rounded-xl shadow-2xs">
               <span className="text-[10px] font-extrabold uppercase text-[#68677A] block tracking-wider">Claimed</span>
-              <span className="text-base sm:text-lg font-black text-[#5B4BFF]">{rsvpCount} / {totalTickets}</span>
+              <span className="text-base sm:text-lg font-black text-[#0F172A]">{rsvpCount} / {totalTickets}</span>
             </div>
             <div className="bg-white border border-[#E8E7EF] p-2.5 rounded-xl shadow-2xs">
               <span className="text-[10px] font-extrabold uppercase text-[#68677A] block tracking-wider">Unique Members</span>
@@ -139,11 +139,11 @@ export default function AttendeesModal({ isOpen, onClose, eventId }) {
 
           <div className="flex items-center justify-between text-xs font-bold text-[#11112A] mb-1.5">
             <span>Capacity Progress</span>
-            <span className="text-[#5B4BFF]">{percentage}% Filled</span>
+            <span className="text-[#0F172A]">{percentage}% Filled</span>
           </div>
           <div className="w-full bg-[#E8E7EF] rounded-full h-2.5 overflow-hidden">
             <div
-              className="bg-gradient-to-r from-[#5B4BFF] via-[#7B61FF] to-[#9E8BFF] h-2.5 rounded-full transition-all duration-500 shadow-sm"
+              className="bg-[#0F172A] h-2.5 rounded-full transition-all duration-500 shadow-sm"
               style={{ width: `${percentage}%` }}
             />
           </div>
@@ -157,30 +157,28 @@ export default function AttendeesModal({ isOpen, onClose, eventId }) {
               placeholder="Search attendee by name or email..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2.5 text-xs bg-[#FAF9FC] border border-[#E8E7EF] focus:border-[#5B4BFF] rounded-xl outline-none transition text-[#11112A] placeholder-[#9291A0]"
+              className="w-full pl-9 pr-4 py-2.5 text-xs bg-[#FAF9FC] border border-[#E8E7EF] focus:border-[#0F172A] rounded-xl outline-none transition text-[#11112A] placeholder-[#9291A0] font-bold"
             />
-            <span className="absolute left-3 top-3 text-xs text-[#9291A0]">🔍</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-[#68677A]">🔍</span>
           </div>
         ) : null}
 
         {/* Attendee List Content */}
         <div className="flex-1 overflow-y-auto pr-1">
           {loading ? (
-            <div className="py-14 text-center text-[#68677A] text-xs font-medium">
-              <span className="inline-block animate-spin text-2xl mb-2">⏳</span>
-              <p>Loading attendee records...</p>
+            <div className="py-12 text-center text-xs font-bold text-[#68677A] flex items-center justify-center gap-2">
+              <span className="animate-spin">⏳</span>
+              <span>Loading registered attendees...</span>
             </div>
           ) : error ? (
             <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-xs font-semibold text-center">
               {error}
             </div>
           ) : groupedAttendees.length === 0 ? (
-            <div className="py-12 text-center text-[#68677A]">
-              <div className="text-3xl mb-2">👥</div>
-              <h4 className="text-sm font-bold text-[#11112A] mb-1">
-                {searchQuery ? 'No matching attendees found' : 'No Attendees Registered Yet'}
-              </h4>
-              <p className="text-xs">
+            <div className="bg-[#FAF9FC] border border-dashed border-[#CBD5E1] rounded-2xl p-8 text-center my-2">
+              <span className="text-3xl block mb-2">👥</span>
+              <h4 className="text-sm font-bold text-[#11112A] mb-1">No Attendees Found</h4>
+              <p className="text-xs text-[#68677A] max-w-xs mx-auto font-medium">
                 {searchQuery
                   ? 'Try searching with a different name or email.'
                   : 'When members reserve tickets for this event, they will appear here.'}
@@ -191,11 +189,11 @@ export default function AttendeesModal({ isOpen, onClose, eventId }) {
               {groupedAttendees.map((attendee, idx) => (
                 <div
                   key={attendee.user_email || idx}
-                  className="bg-white border border-[#E8E7EF] hover:border-[#5B4BFF]/50 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs hover:shadow-md transition-all duration-200"
+                  className="bg-white border border-[#E8E7EF] hover:border-[#0F172A]/50 rounded-2xl p-4 flex items-center justify-between gap-3 shadow-xs hover:shadow-md transition-all duration-200"
                 >
                   {/* Left: Avatar & User Details */}
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#5B4BFF] to-[#8075FF] text-white flex items-center justify-center text-base font-extrabold flex-shrink-0 shadow-sm shadow-[#5B4BFF]/20">
+                    <div className="w-11 h-11 rounded-2xl bg-[#0F172A] text-white flex items-center justify-center text-base font-extrabold flex-shrink-0 shadow-sm">
                       {attendee.user_name ? attendee.user_name.charAt(0).toUpperCase() : 'U'}
                     </div>
 
@@ -204,14 +202,14 @@ export default function AttendeesModal({ isOpen, onClose, eventId }) {
                         <h4 className="text-sm font-bold text-[#11112A] truncate">
                           {attendee.user_name}
                         </h4>
-                        <span className="text-[10px] font-bold text-[#5B4BFF] bg-[#F1EEFF] px-2.5 py-0.5 rounded-full border border-[#E0D9FF] whitespace-nowrap">
+                        <span className="text-[10px] font-bold text-[#0F172A] bg-[#F1F5F9] px-2.5 py-0.5 rounded-full border border-[#E2E8F0] whitespace-nowrap">
                           🎟️ {attendee.ticket_count} {attendee.ticket_count === 1 ? 'Ticket' : 'Tickets'}
                         </span>
                       </div>
                       <p className="text-xs text-[#68677A] truncate font-medium">
                         ✉️ {attendee.user_email}
                       </p>
-                      <p className="text-xs text-[#5B4BFF] truncate font-semibold mt-0.5 flex items-center gap-1">
+                      <p className="text-xs text-[#0F172A] truncate font-semibold mt-0.5 flex items-center gap-1">
                         <span>📞</span>
                         <span>{attendee.user_phone || 'No phone provided'}</span>
                       </p>

@@ -5,32 +5,32 @@ export const CATEGORY_CONFIG = {
   sports: {
     label: 'Sports',
     icon: Dumbbell,
-    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
-    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
+    colorClass: 'bg-white text-[#0F172A] border-[#E2E8F0] hover:bg-[#F1F5F9]',
+    activeClass: 'bg-[#0F172A] text-white border-[#0F172A] shadow-md font-extrabold',
   },
   music: {
     label: 'Music',
     icon: Music,
-    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
-    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
+    colorClass: 'bg-white text-[#0F172A] border-[#E2E8F0] hover:bg-[#F1F5F9]',
+    activeClass: 'bg-[#0F172A] text-white border-[#0F172A] shadow-md font-extrabold',
   },
   food: {
     label: 'Food & Drink',
     icon: Utensils,
-    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
-    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
+    colorClass: 'bg-white text-[#0F172A] border-[#E2E8F0] hover:bg-[#F1F5F9]',
+    activeClass: 'bg-[#0F172A] text-white border-[#0F172A] shadow-md font-extrabold',
   },
   yard_sale: {
     label: 'Yard Sale',
     icon: Tag,
-    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
-    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
+    colorClass: 'bg-white text-[#0F172A] border-[#E2E8F0] hover:bg-[#F1F5F9]',
+    activeClass: 'bg-[#0F172A] text-white border-[#0F172A] shadow-md font-extrabold',
   },
   other: {
     label: 'Other',
     icon: Compass,
-    colorClass: 'bg-[#F4F3F8] text-[#0F0F14] border-[#E8E7EF] hover:bg-[#EAE8F5]',
-    activeClass: 'bg-[#0F0F14] text-white border-[#0F0F14] shadow-md',
+    colorClass: 'bg-white text-[#0F172A] border-[#E2E8F0] hover:bg-[#F1F5F9]',
+    activeClass: 'bg-[#0F172A] text-white border-[#0F172A] shadow-md font-extrabold',
   },
 };
 
@@ -45,7 +45,7 @@ export default function CategoryBadge({ category, active = false, onClick, class
     <Component
       type={onClick ? 'button' : undefined}
       onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold border transition duration-150 whitespace-nowrap ${baseClass} ${className}`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border transition duration-150 whitespace-nowrap ${baseClass} ${className}`}
     >
       <IconComponent className="w-3.5 h-3.5" />
       <span>{config.label}</span>

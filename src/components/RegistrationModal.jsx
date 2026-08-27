@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
+import {
+  Ticket,
+  Calendar,
+  User,
+  Mail,
+  MapPin,
+  Building2,
+  CreditCard,
+  Plus,
+  Minus,
+  X,
+  CheckCircle2,
+  ShieldCheck
+} from 'lucide-react';
 import Swal from 'sweetalert2';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
@@ -65,7 +79,7 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
   const totalTickets = event.total_tickets || 50;
   const rsvpCount = event.rsvp_count || 0;
   const remainingTickets = Math.max(0, totalTickets - rsvpCount);
-  const maxAllowed = Math.min(10, remainingTickets);
+  const maxAllowed = remainingTickets;
 
   const ticketPrice = event.ticket_price || 0;
   const totalPrice = ticketPrice * quantity;
@@ -73,9 +87,17 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
   const organizerName = event.creator?.name || 'Community Event Host';
   const organizerEmail = event.creator?.email || 'contact@localbulletin.com';
 
+  const isHost = !!(user && (user.id === event.created_by || user.id === event.creator?.id));
+
   const handleBooking = async (e) => {
     e.preventDefault();
     setError(null);
+
+    if (isHost) {
+      setError('As the host and creator of this event, you cannot register or purchase tickets for your own event.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -92,16 +114,15 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
           onRsvpSuccess(event.id, newCount, ticketNumbers);
         }
 
-        // Green Success Popup
         await Swal.fire({
-          title: 'Registration Successful! 🎉',
-          text: `Your ticket pass #${ticketNumbers.join(', #')} has been confirmed.`,
+          title: 'Registration Successful!',
+          text: `Your ticket pass #${ticketNumbers.join(', #')} has been confirmed. A copy of your booking pass invoice has been sent to ${user?.email || 'your email'}.`,
           icon: 'success',
-          confirmButtonColor: '#10B981',
-          confirmButtonText: 'View My Bookings 🎟️',
+          confirmButtonColor: '#0F172A',
+          confirmButtonText: 'View My Bookings',
           customClass: {
             popup: 'rounded-3xl p-6 font-sans',
-            confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md shadow-emerald-500/25',
+            confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md',
           },
         });
 
@@ -135,7 +156,7 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
             contact: user?.phone || '',
           },
           theme: {
-            color: '#5B4BFF',
+            color: '#0F172A',
           },
           handler: async function (response) {
             try {
@@ -168,16 +189,15 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
                 });
               }
 
-              // Green Success Popup
               await Swal.fire({
-                title: 'Payment Successful! 🎉',
-                text: `Payment verified! Ticket pass #${verifyRes.data.ticket_numbers.join(', #')} confirmed.`,
+                title: 'Payment Successful!',
+                text: `Payment verified! Ticket pass #${verifyRes.data.ticket_numbers.join(', #')} confirmed. A copy of your payment invoice has been sent to ${user?.email || 'your email'}.`,
                 icon: 'success',
-                confirmButtonColor: '#10B981',
-                confirmButtonText: 'View My Bookings 🎟️',
+                confirmButtonColor: '#0F172A',
+                confirmButtonText: 'View My Bookings',
                 customClass: {
                   popup: 'rounded-3xl p-6 font-sans',
-                  confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md shadow-emerald-500/25',
+                  confirmButton: 'px-6 py-2.5 rounded-full text-xs font-bold shadow-md',
                 },
               });
 
@@ -208,49 +228,50 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white border border-[#E8E7EF] rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto text-[#11112A]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto font-sans">
+      <div className="bg-white border border-[#E2E8F0] rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto text-[#0F172A]">
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] rounded-full text-base transition font-semibold"
+          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] rounded-full text-base transition font-bold cursor-pointer"
         >
-          ✕
+          <X className="w-4 h-4" />
         </button>
 
         {/* Modal Header */}
-        <div className="mb-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1EEFF] text-[#5B4BFF] text-xs font-bold mb-2">
-            <span>🎟️</span>
+        <div className="mb-5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1F5F9] text-[#0F172A] border border-[#E2E8F0] text-xs font-bold mb-2">
+            <Ticket className="w-3.5 h-3.5 text-[#0F172A]" />
             <span>Event Registration</span>
           </div>
-          <h2 className="text-2xl font-extrabold text-[#11112A] tracking-tight mb-1 leading-snug">
+          <h2 className="text-2xl font-black text-[#0F172A] tracking-tight leading-snug">
             {event.title}
           </h2>
-          <div className="flex items-center gap-2 text-xs text-[#68677A] mt-2">
-            <span>📅 {formatEventDate(event.event_datetime)}</span>
+          <div className="flex items-center gap-1.5 text-xs font-bold text-[#64748B] mt-1.5">
+            <Calendar className="w-3.5 h-3.5 text-[#0F172A]" />
+            <span>{formatEventDate(event.event_datetime)}</span>
           </div>
         </div>
 
         {/* Organizer Banner Card */}
-        <div className="bg-[#F8F7FC] border border-[#E8E7EF] rounded-2xl p-4 mb-6 relative overflow-hidden">
-          <div className="text-[10px] font-extrabold text-[#5B4BFF] uppercase tracking-wider mb-2 flex items-center gap-1">
-            <span>👑</span>
+        <div className="bg-[#F1F5F9] border border-[#E2E8F0] rounded-2xl p-3.5 mb-4 relative overflow-hidden">
+          <div className="text-[10px] font-black text-[#64748B] uppercase tracking-wider mb-2 flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#0F172A]" />
             <span>Event Organizer Contact</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#5B4BFF] to-[#8075FF] text-white flex items-center justify-center font-bold text-sm shadow-sm flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-black text-xs shadow-md flex-shrink-0">
               {organizerName.charAt(0).toUpperCase()}
             </div>
 
             <div className="min-w-0">
-              <h4 className="text-xs font-bold text-[#11112A] truncate">{organizerName}</h4>
+              <h4 className="text-xs font-bold text-[#0F172A] truncate">{organizerName}</h4>
               <a
                 href={`mailto:${organizerEmail}`}
-                className="text-xs font-medium text-[#5B4BFF] hover:underline flex items-center gap-1 truncate"
+                className="text-xs font-bold text-[#0F172A] hover:underline flex items-center gap-1 truncate mt-0.5"
               >
-                <span>✉️</span>
+                <Mail className="w-3 h-3 text-[#0F172A]" />
                 <span className="truncate">{organizerEmail}</span>
               </a>
             </div>
@@ -258,46 +279,56 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
         </div>
 
         {/* Event Location Summary */}
-        <div className="mb-6 space-y-2 text-xs text-[#68677A] bg-[#FAFAFC] p-3 rounded-xl border border-[#E8E7EF]/60">
-          <div className="flex items-center gap-2 font-medium">
-            <span>📍</span>
-            <span>Neighborhood: <strong>{event.neighborhood}</strong>, {event.city}</span>
+        <div className="mb-5 space-y-1.5 text-xs text-[#64748B] bg-[#F8FAFC] p-3 rounded-2xl border border-[#E2E8F0]">
+          <div className="flex items-center gap-1.5 font-bold text-[#0F172A]">
+            <MapPin className="w-3.5 h-3.5 text-[#0F172A]" />
+            <span>Location: <strong>{districtLocation}</strong></span>
           </div>
-          <div className="flex items-center gap-2 font-medium">
-            <span>🏢</span>
-            <span>Address: {event.location}</span>
+          <div className="flex items-center gap-1.5 font-semibold">
+            <Building2 className="w-3.5 h-3.5 text-[#64748B]" />
+            <span>Venue Address: {event.location}</span>
           </div>
         </div>
 
+        {isHost && (
+          <div className="mb-4 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-start gap-3">
+            <span className="text-xl leading-none">👑</span>
+            <div>
+              <div className="font-extrabold text-amber-950 mb-0.5">Event Host Notice</div>
+              <span>You are the organizer and creator of this event. Hosts cannot reserve tickets or register for their own events. You can manage your event and view registered attendees from "My Events".</span>
+            </div>
+          </div>
+        )}
+
         {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold">
+          <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-bold">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleBooking} className="space-y-6">
+        <form onSubmit={handleBooking} className="space-y-5">
           {/* Ticket Quantity Selection */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-xs font-bold text-[#11112A]">Select Number of Tickets *</label>
-              <span className="text-xs font-semibold text-[#5B4BFF]">
+              <label className="block text-xs font-black text-[#0F172A]">Select Number of Tickets *</label>
+              <span className="text-xs font-bold text-[#0F172A]">
                 {remainingTickets} Tickets Available
               </span>
             </div>
 
-            <div className="flex items-center justify-between bg-[#F4F3F8] border border-[#E8E7EF] rounded-2xl p-3 mb-4">
+            <div className="flex items-center justify-between bg-[#F1F5F9] border border-[#E2E8F0] rounded-2xl p-3 mb-4">
               <button
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                disabled={quantity <= 1}
-                className="w-10 h-10 rounded-xl bg-white border border-[#E8E7EF] text-[#11112A] hover:bg-[#F1EEFF] hover:border-[#5B4BFF] font-bold text-lg flex items-center justify-center transition disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
+                disabled={quantity <= 1 || isHost}
+                className="w-9 h-9 rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] hover:bg-slate-50 font-black text-lg flex items-center justify-center transition disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs cursor-pointer"
               >
-                -
+                <Minus className="w-4 h-4 text-[#0F172A]" />
               </button>
 
               <div className="text-center">
-                <span className="text-xl font-extrabold text-[#11112A] block leading-none">{quantity}</span>
-                <span className="text-[10px] text-[#68677A] font-medium">
+                <span className="text-xl font-black text-[#0F172A] block leading-none">{quantity}</span>
+                <span className="text-[10px] text-[#64748B] font-bold uppercase tracking-wider">
                   {quantity === 1 ? 'Ticket' : 'Tickets'}
                 </span>
               </div>
@@ -305,24 +336,24 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
               <button
                 type="button"
                 onClick={() => setQuantity(Math.min(maxAllowed, quantity + 1))}
-                disabled={quantity >= maxAllowed}
-                className="w-10 h-10 rounded-xl bg-white border border-[#E8E7EF] text-[#11112A] hover:bg-[#F1EEFF] hover:border-[#5B4BFF] font-bold text-lg flex items-center justify-center transition disabled:opacity-40 disabled:cursor-not-allowed shadow-xs"
+                disabled={quantity >= maxAllowed || isHost}
+                className="w-9 h-9 rounded-xl bg-white border border-[#E2E8F0] text-[#0F172A] hover:bg-slate-50 font-black text-lg flex items-center justify-center transition disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs cursor-pointer"
               >
-                +
+                <Plus className="w-4 h-4 text-[#0F172A]" />
               </button>
             </div>
 
             {/* Price Calculation Summary */}
-            <div className="bg-[#EEF2FF] border border-[#C7D2FE] rounded-2xl p-4 flex items-center justify-between text-xs">
+            <div className="bg-[#F1F5F9] border border-[#E2E8F0] rounded-2xl p-3.5 flex items-center justify-between text-xs">
               <div>
-                <span className="text-[#68677A] block">Ticket Price</span>
-                <span className="font-bold text-[#11112A] text-sm">
+                <span className="text-[#64748B] font-bold block uppercase text-[9px] tracking-wider">Ticket Price</span>
+                <span className="font-bold text-[#0F172A] text-sm">
                   {ticketPrice > 0 ? `₹${ticketPrice} / ticket` : 'FREE'}
                 </span>
               </div>
               <div className="text-right">
-                <span className="text-[#68677A] block">Total Payable</span>
-                <span className="font-black text-[#4F46E5] text-base">
+                <span className="text-[#64748B] font-bold block uppercase text-[9px] tracking-wider">Total Payable</span>
+                <span className="font-black text-[#0F172A] text-base">
                   {totalPrice > 0 ? `₹${totalPrice}` : '₹0 (FREE)'}
                 </span>
               </div>
@@ -330,28 +361,37 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
           </div>
 
           {/* Registration & Payment Action Button */}
-          <div className="pt-2 border-t border-[#F0EFF6] flex items-center justify-between gap-3">
+          <div className="pt-2 border-t border-[#F1F5F9] flex items-center justify-between gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-full border border-[#E8E7EF] text-[#68677A] hover:text-[#11112A] hover:bg-[#F4F3F8] font-semibold text-xs transition"
+              className="px-4 py-2 rounded-full border border-[#E2E8F0] text-[#64748B] hover:text-[#0F172A] hover:bg-[#F1F5F9] font-bold text-xs transition cursor-pointer"
             >
               Cancel
             </button>
 
             <button
               type="submit"
-              disabled={loading || remainingTickets === 0}
-              className="px-6 py-2.5 rounded-full bg-[#5B4BFF] hover:bg-[#4C3CE6] active:bg-[#3F2FD1] text-white font-semibold text-xs transition shadow-md shadow-[#5B4BFF]/20 disabled:opacity-50 flex items-center gap-2"
+              disabled={loading || remainingTickets === 0 || isHost}
+              className="px-6 py-2.5 rounded-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-extrabold text-xs transition shadow-md disabled:opacity-50 flex items-center gap-2 cursor-pointer"
             >
-              <span>{loading ? '⏳' : totalPrice > 0 ? '💳' : '🙌'}</span>
-              <span>
-                {loading
-                  ? 'Processing...'
-                  : totalPrice > 0
-                  ? `Pay ₹${totalPrice} via Razorpay`
-                  : `Confirm Registration (${quantity} ${quantity === 1 ? 'Ticket' : 'Tickets'})`}
-              </span>
+              {isHost ? (
+                <>
+                  <span>👑</span>
+                  <span>You Are The Event Host</span>
+                </>
+              ) : (
+                <>
+                  {totalPrice > 0 ? <CreditCard className="w-4 h-4 text-white" /> : <Ticket className="w-4 h-4 text-white" />}
+                  <span>
+                    {loading
+                      ? 'Processing...'
+                      : totalPrice > 0
+                      ? `Pay ₹${totalPrice} via Razorpay`
+                      : `Confirm Registration (${quantity} ${quantity === 1 ? 'Ticket' : 'Tickets'})`}
+                  </span>
+                </>
+              )}
             </button>
           </div>
         </form>
