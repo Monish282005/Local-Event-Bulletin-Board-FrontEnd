@@ -108,7 +108,7 @@ export default function EventDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAF9FC] text-[#11112A] flex flex-col font-sans">
+      <div className="min-h-screen text-[#11112A] flex flex-col font-sans">
         <Navbar onCreateClick={handleCreateClick} />
         <main className="flex-1 flex items-center justify-center p-6">
           <div className="bg-white border border-[#E8E7EF] rounded-3xl p-8 max-w-lg w-full animate-pulse text-center shadow-sm">

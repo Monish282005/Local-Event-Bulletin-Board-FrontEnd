@@ -3,7 +3,7 @@ import EventCard from './EventCard';
 
 function SkeletonCard() {
   return (
-    <div className="bg-white border border-[#E8E7EF] rounded-2xl p-6 shadow-sm animate-pulse flex flex-col justify-between h-80">
+    <div className="border border-[#E8E7EF] rounded-2xl p-6 shadow-sm animate-pulse flex flex-col justify-between h-80">
       <div>
         <div className="flex justify-between items-center mb-4">
           <div className="h-6 w-24 bg-slate-100 rounded-full"></div>
@@ -24,7 +24,16 @@ function SkeletonCard() {
   );
 }
 
-export default function EventGrid({ events, loading, error, onRetry, onRsvpUpdate, onEventUpdated, onEventDeleted }) {
+export default function EventGrid({
+  events,
+  loading,
+  error,
+  showOwnerControls = false,
+  onRetry,
+  onRsvpUpdate,
+  onEventUpdated,
+  onEventDeleted,
+}) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -64,11 +73,12 @@ export default function EventGrid({ events, loading, error, onRetry, onRsvpUpdat
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-start">
       {events.map((event) => (
         <EventCard
           key={event.id}
           event={event}
+          showOwnerControls={showOwnerControls}
           onRsvpUpdate={onRsvpUpdate}
           onEventUpdated={onEventUpdated}
           onEventDeleted={onEventDeleted}
