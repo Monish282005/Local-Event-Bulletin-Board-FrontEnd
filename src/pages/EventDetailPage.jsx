@@ -202,6 +202,8 @@ export default function EventDetailPage() {
             </div>
             <a
               href={`mailto:${organizerEmail}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-4 py-2 rounded-full bg-[#F1F5F9] text-[#0F172A] hover:bg-[#E2E8F0] text-xs font-bold transition flex items-center gap-1.5 border border-[#E2E8F0] cursor-pointer"
             >
               <span>✉️</span>

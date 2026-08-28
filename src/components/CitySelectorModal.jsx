@@ -1,7 +1,39 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import {
+  X,
+  Search,
+  Navigation,
+  MapPin,
+  Trees,
+  Building2,
+  Waves,
+  Landmark,
+  Sun,
+  Castle,
+  GraduationCap,
+  Compass,
+  Wind,
+  Anchor,
+  Crown,
+  Loader2
+} from 'lucide-react';
 import { POPULAR_CITIES, detectUserCity } from '../utils/locationHelper';
 import Swal from 'sweetalert2';
+
+const CITY_ICON_MAP = {
+  Trees: { component: Trees, colorClass: 'bg-emerald-50 text-emerald-600 border-emerald-200' },
+  Building2: { component: Building2, colorClass: 'bg-blue-50 text-blue-600 border-blue-200' },
+  Waves: { component: Waves, colorClass: 'bg-cyan-50 text-cyan-600 border-cyan-200' },
+  Landmark: { component: Landmark, colorClass: 'bg-amber-50 text-amber-600 border-amber-200' },
+  Sun: { component: Sun, colorClass: 'bg-orange-50 text-orange-600 border-orange-200' },
+  Castle: { component: Castle, colorClass: 'bg-purple-50 text-purple-600 border-purple-200' },
+  GraduationCap: { component: GraduationCap, colorClass: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
+  Compass: { component: Compass, colorClass: 'bg-red-50 text-red-600 border-red-200' },
+  Wind: { component: Wind, colorClass: 'bg-teal-50 text-teal-600 border-teal-200' },
+  Anchor: { component: Anchor, colorClass: 'bg-sky-50 text-sky-600 border-sky-200' },
+  Crown: { component: Crown, colorClass: 'bg-yellow-50 text-yellow-600 border-yellow-200' },
+};
 
 export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSelectCity }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,7 +53,7 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
       onSelectCity(city);
       onClose();
       Swal.fire({
-        title: 'Location Detected! 📍',
+        title: 'Location Detected!',
         text: `Showing events for ${city}`,
         icon: 'success',
         timer: 1800,
@@ -45,19 +77,21 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto animate-fade-in font-sans">
       <div className="bg-white rounded-3xl border border-[#E8E7EF] max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative my-8">
         {/* Close Button */}
         <button
+          type="button"
           onClick={onClose}
           className="absolute top-5 right-5 w-9 h-9 rounded-full bg-[#F4F3F8] hover:bg-[#E8E7EF] text-[#68677A] font-bold text-sm flex items-center justify-center transition cursor-pointer"
         >
-          ✕
+          <X className="w-4 h-4 text-[#0F172A]" />
         </button>
 
         {/* Modal Header */}
         <div className="mb-6">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F1F5F9] text-[#0F172A] border border-[#E2E8F0] text-xs font-bold mb-2">
+            <MapPin className="w-3.5 h-3.5 text-[#2563EB]" />
             <span>Location Selector</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black text-[#11112A] tracking-tight">
@@ -71,11 +105,16 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
         {/* Detect My Location Button & Search Bar */}
         <div className="space-y-4 mb-8">
           <button
+            type="button"
             onClick={handleDetectLocation}
             disabled={detecting}
             className="w-full py-3.5 px-5 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] active:scale-[0.99] text-white font-bold text-sm transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
           >
-            <span>{detecting ? '⏳' : '🎯'}</span>
+            {detecting ? (
+              <Loader2 className="w-4 h-4 text-emerald-400 animate-spin" />
+            ) : (
+              <Navigation className="w-4 h-4 text-emerald-400" />
+            )}
             <span>{detecting ? 'Detecting your current location...' : 'Detect My Location (GPS / IP)'}</span>
           </button>
 
@@ -87,11 +126,11 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-24 py-3.5 rounded-2xl bg-[#F4F3F8] border border-[#E8E7EF] text-[#11112A] text-xs sm:text-sm font-semibold focus:outline-none focus:border-[#0F172A] focus:bg-white transition"
             />
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#68677A] text-base">🔍</span>
+            <Search className="w-4 h-4 text-[#68677A] absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             {searchQuery.trim() && (
               <button
                 type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-xl bg-[#5B4BFF] text-white text-xs font-bold hover:bg-[#4C3CE6] transition cursor-pointer"
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 rounded-xl bg-[#0F172A] text-white text-xs font-bold hover:bg-[#1E293B] transition cursor-pointer"
               >
                 Select
               </button>
@@ -107,21 +146,28 @@ export default function CitySelectorModal({ isOpen, onClose, selectedCity, onSel
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-64 overflow-y-auto pr-1">
             {filteredCities.map((c) => {
               const isSelected = selectedCity?.toLowerCase() === c.name.toLowerCase();
+              const iconInfo = CITY_ICON_MAP[c.iconName] || { component: MapPin, colorClass: 'bg-blue-50 text-blue-600 border-blue-200' };
+              const IconComponent = iconInfo.component;
+
               return (
                 <button
                   key={c.name}
+                  type="button"
                   onClick={() => {
                     onSelectCity(c.name);
                     onClose();
                   }}
-                  className={`p-3.5 rounded-2xl border text-left transition flex items-center gap-3 cursor-pointer ${isSelected
-                    ? 'bg-[#F1EEFF] border-[#5B4BFF] text-[#5B4BFF] font-bold shadow-xs'
-                    : 'bg-white hover:bg-[#F4F3F8] border-[#E8E7EF] text-[#11112A] font-semibold'
-                    }`}
+                  className={`p-3 rounded-2xl border text-left transition flex items-center gap-3 cursor-pointer ${
+                    isSelected
+                      ? 'bg-[#F1F5F9] border-[#0F172A] text-[#0F172A] font-extrabold shadow-sm'
+                      : 'bg-white hover:bg-[#F4F3F8] border-[#E8E7EF] text-[#11112A] font-semibold'
+                  }`}
                 >
-                  <span className="text-xl">{c.icon}</span>
+                  <div className={`w-9 h-9 rounded-xl border flex items-center justify-center flex-shrink-0 ${iconInfo.colorClass}`}>
+                    <IconComponent className="w-4 h-4" />
+                  </div>
                   <div className="min-w-0">
-                    <div className="text-xs truncate">{c.name}</div>
+                    <div className="text-xs font-bold truncate">{c.name}</div>
                     <div className="text-[10px] text-[#68677A] font-medium truncate">{c.state}</div>
                   </div>
                 </button>

@@ -252,6 +252,8 @@ export default function RegistrationModal({ isOpen, onClose, event, onRsvpSucces
               <h4 className="text-xs font-bold text-[#0F172A] truncate">{organizerName}</h4>
               <a
                 href={`mailto:${organizerEmail}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-xs font-bold text-[#0F172A] hover:underline flex items-center gap-1 truncate mt-0.5"
               >
                 <Mail className="w-3 h-3 text-[#0F172A]" />

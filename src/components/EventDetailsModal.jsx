@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import Swal from 'sweetalert2';
 import {
   X,
   MapPin,
@@ -19,6 +20,7 @@ import CategoryBadge from './CategoryBadge';
 import RegistrationModal from './RegistrationModal';
 import EventMapModal from './EventMapModal';
 import { useAuth } from '../context/AuthContext';
+import { getCategoryDefaultImage } from '../utils/defaultCategoryImages';
 
 function formatEventDate(dateString) {
   if (!dateString) return '';
@@ -63,7 +65,7 @@ export default function EventDetailsModal({
   const remainingTickets = Math.max(0, totalTickets - currentRsvpCount);
   const isCompleted = event.is_expired || (event.event_datetime && new Date(event.event_datetime) <= new Date());
 
-  const displayImage = event.image_url || localStorage.getItem(`event_img_${event.id}`);
+  const displayImage = event.image_url || localStorage.getItem(`event_img_${event.id}`) || getCategoryDefaultImage(event.category);
   const districtLocation = event.district || event.city || event.neighborhood || 'Local';
   const organizerName = event.creator?.name || 'Community Event Host';
   const organizerEmail = event.creator?.email || 'contact@localbulletin.com';
@@ -74,8 +76,8 @@ export default function EventDetailsModal({
   const googleMapsUrl = lat && lng
     ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        `${event.location}, ${event.city || event.neighborhood}, ${event.state}, ${event.country || 'India'}`
-      )}`;
+      `${event.location}, ${event.city || event.neighborhood}, ${event.state}, ${event.country || 'India'}`
+    )}`;
 
   const isEventHost = !!(user && (user.id === event.created_by || user.id === event.creator?.id));
 
@@ -124,21 +126,21 @@ export default function EventDetailsModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/60 backdrop-blur-sm animate-fade-in font-sans">
       <div className="bg-white border border-[#E2E8F0] rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden relative max-h-[90vh] flex flex-col my-auto">
         {/* Top Sticky Header Bar */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#E2E8F0] bg-white sticky top-0 z-10">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between gap-2 px-4 sm:px-5 py-3 border-b border-[#E2E8F0] bg-white sticky top-0 z-10">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0 flex-1">
             <CategoryBadge category={event.category} />
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0]">
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0] whitespace-nowrap flex-shrink-0">
               {event.ticket_price > 0 ? `₹${event.ticket_price}` : 'FREE'}
             </span>
-            <span className="text-xs font-bold text-[#0F172A] bg-[#F1F5F9] px-2.5 py-0.5 rounded-full border border-[#E2E8F0] flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-[#2563EB]" />
-              <span>{districtLocation}</span>
+            <span className="text-xs font-bold text-[#0F172A] bg-[#F1F5F9] px-2.5 py-0.5 rounded-full border border-[#E2E8F0] inline-flex items-center gap-1 min-w-0 max-w-[95px] sm:max-w-[180px]">
+              <MapPin className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
+              <span className="truncate">{districtLocation}</span>
             </span>
           </div>
 
           <button
             onClick={onClose}
-            className="w-7 h-7 rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] flex items-center justify-center transition cursor-pointer font-bold"
+            className="w-8 h-8 rounded-full bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] flex items-center justify-center transition cursor-pointer font-bold flex-shrink-0 ml-1"
             title="Close modal"
           >
             <X className="w-4 h-4" />
@@ -269,6 +271,8 @@ export default function EventDetailsModal({
 
             <a
               href={`mailto:${organizerEmail}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-3 py-1.5 rounded-full bg-white text-[#0F172A] hover:bg-slate-50 text-xs font-bold transition flex items-center gap-1 border border-[#E2E8F0] flex-shrink-0 cursor-pointer shadow-2xs"
             >
               <Mail className="w-3.5 h-3.5 text-[#2563EB]" />
@@ -327,13 +331,12 @@ export default function EventDetailsModal({
             <button
               onClick={isCompleted ? undefined : onToggleInterest}
               disabled={isCompleted}
-              className={`px-3.5 py-2 rounded-full font-bold text-xs transition flex items-center gap-1.5 border ${
-                isCompleted
+              className={`px-3.5 py-2 rounded-full font-bold text-xs transition flex items-center gap-1.5 border ${isCompleted
                   ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
                   : hasMarkedInterested
-                  ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md cursor-pointer'
-                  : 'bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] border-[#E2E8F0] cursor-pointer'
-              }`}
+                    ? 'bg-[#0F172A] text-white border-[#0F172A] shadow-md cursor-pointer'
+                    : 'bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#0F172A] border-[#E2E8F0] cursor-pointer'
+                }`}
             >
               <HeartHandshake className="w-3.5 h-3.5" />
               <span>Going ({interestedCount})</span>

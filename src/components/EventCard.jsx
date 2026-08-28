@@ -17,6 +17,7 @@ import EditEventModal from './EditEventModal';
 import AttendeesModal from './AttendeesModal';
 import EventDetailsModal from './EventDetailsModal';
 import { useAuth } from '../context/AuthContext';
+import { getCategoryDefaultImage } from '../utils/defaultCategoryImages';
 
 function formatEventDate(dateString) {
   if (!dateString) return '';
@@ -54,7 +55,7 @@ export default function EventCard({
 
   // Single district/city location name (e.g. Coimbatore)
   const districtLocation = event.district || event.city || event.neighborhood || 'Local';
-  const displayImage = event.image_url || localStorage.getItem(`event_img_${event.id}`);
+  const displayImage = event.image_url || localStorage.getItem(`event_img_${event.id}`) || getCategoryDefaultImage(event.category);
   const isCompleted = event.is_expired || (event.event_datetime && new Date(event.event_datetime) <= new Date());
 
   // Sync user interest state per event
@@ -228,15 +229,15 @@ export default function EventCard({
         {/* Badges Row: Category, Price, City */}
         <div className="flex items-center gap-1.5 flex-wrap min-w-0">
           <CategoryBadge category={event.category} />
-          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0] whitespace-nowrap">
+          <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-[#F1F5F9] text-[#0F172A] border-[#E2E8F0] whitespace-nowrap flex-shrink-0">
             {event.ticket_price > 0 ? `₹${event.ticket_price}` : 'FREE'}
           </span>
-          <span className="text-xs font-bold text-[#0F172A] bg-[#F1F5F9] px-2.5 py-0.5 rounded-full border border-[#E2E8F0] inline-flex items-center gap-1 whitespace-nowrap">
-            <MapPin className="w-3 h-3 text-[#0F172A]" />
-            <span className="truncate max-w-[110px]">{districtLocation}</span>
+          <span className="text-xs font-bold text-[#0F172A] bg-[#F1F5F9] px-2.5 py-0.5 rounded-full border border-[#E2E8F0] inline-flex items-center gap-1 min-w-0 max-w-[100px] sm:max-w-[140px]">
+            <MapPin className="w-3 h-3 text-[#0F172A] flex-shrink-0" />
+            <span className="truncate">{districtLocation}</span>
           </span>
           {(event.is_expired || (event.event_datetime && new Date(event.event_datetime) <= new Date())) && (
-            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-slate-100 text-slate-500 border-slate-200 whitespace-nowrap">
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-slate-100 text-slate-500 border-slate-200 whitespace-nowrap flex-shrink-0">
               Completed
             </span>
           )}
