@@ -5,6 +5,7 @@ import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
 import LocationMapPicker from './LocationMapPicker';
 import CustomDateTimePicker from './CustomDateTimePicker';
+import CustomCategorySelect from './CustomCategorySelect';
 import { forwardGeocode } from '../utils/mapGeocodingHelper';
 import {
   fetchCountriesFromApi,
@@ -439,20 +440,13 @@ export default function CreateEventModal({ isOpen, onClose, onEventCreated }) {
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative z-30">
+            <div className="relative z-30">
               <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Category *</label>
-              <select
+              <CustomCategorySelect
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E8EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setCategory(val)}
+              />
             </div>
 
             <div>

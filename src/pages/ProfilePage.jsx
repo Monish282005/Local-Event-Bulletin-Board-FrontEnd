@@ -135,32 +135,38 @@ export default function ProfilePage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 flex-1 w-full">
         {/* Profile Header Banner */}
-        <div className="bg-white border border-[#E8E7EF] rounded-3xl p-6 sm:p-8 shadow-xs mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-[#0F0F14] text-white flex items-center justify-center text-2xl sm:text-3xl font-black shadow-md">
+        <div className="bg-white border border-[#E8E7EF] rounded-3xl p-5 sm:p-8 shadow-xs mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 sm:gap-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5 w-full sm:w-auto">
+            {/* Avatar Circle/Box */}
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-[#0F0F14] text-white flex items-center justify-center text-2xl sm:text-3xl font-black shadow-md flex-shrink-0 aspect-square">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-2xl sm:text-3xl font-black text-[#0F0F14] tracking-tight">{user?.name}</h2>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200 flex items-center gap-1">
+
+            {/* User Details */}
+            <div className="space-y-1.5 min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-xl sm:text-3xl font-black text-[#0F0F14] tracking-tight truncate max-w-full">
+                  {user?.name}
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200 flex items-center gap-1 flex-shrink-0 whitespace-nowrap">
                   <ShieldCheck className="w-3 h-3 text-emerald-600" /> Verified Member
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#68677A] font-semibold">
-                <span className="flex items-center gap-1">
-                  <Mail className="w-3.5 h-3.5 text-[#68677A]" /> {user?.email}
+
+              <div className="flex flex-col sm:flex-row sm:flex-wrap items-start sm:items-center gap-x-4 gap-y-1.5 text-xs text-[#68677A] font-semibold">
+                <span className="flex items-center gap-1.5 truncate max-w-full">
+                  <Mail className="w-3.5 h-3.5 text-[#68677A] flex-shrink-0" /> <span className="truncate">{user?.email}</span>
                 </span>
                 {user?.phone && (
-                  <span className="flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-[#68677A]" /> {user?.phone}
+                  <span className="flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-[#68677A] flex-shrink-0" /> <span>{user?.phone}</span>
                   </span>
                 )}
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-[#68677A]" /> {city}, {state}
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#68677A] flex-shrink-0" /> <span>{city}, {state}</span>
                 </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-[#68677A]" /> Joined {formatDate(user?.created_at || new Date()).split(',')[0]}
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-[#68677A] flex-shrink-0" /> <span>Joined {formatDate(user?.created_at || new Date()).split(',')[0]}</span>
                 </span>
               </div>
             </div>
@@ -168,7 +174,7 @@ export default function ProfilePage() {
 
           <button
             onClick={logout}
-            className="px-5 py-2.5 rounded-full bg-[#F4F3F8] hover:bg-red-50 text-[#0F0F14] hover:text-red-600 border border-[#E8E7EF] font-bold text-xs transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-full bg-[#F4F3F8] hover:bg-red-50 text-[#0F0F14] hover:text-red-600 border border-[#E8E7EF] font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
           >
             <LogOut className="w-3.5 h-3.5" />
             <span>Logout</span>
@@ -212,15 +218,15 @@ export default function ProfilePage() {
         </div>
 
         {/* Section Title */}
-        <div className="border-b border-[#E8E7EF] pb-4 mb-8">
+        <div className="border-b border-[#E8E7EF] pb-4 mb-8 max-w-3xl mx-auto">
           <h3 className="text-xl font-black text-[#0F0F14] flex items-center gap-2">
             <User className="w-5 h-5 text-[#0F0F14]" />
             <span>Profile & Location Settings</span>
           </h3>
         </div>
 
-        {/* Profile & Location Settings Form */}
-        <div className="bg-white border border-[#E8E7EF] rounded-3xl p-6 sm:p-8 shadow-xs max-w-3xl">
+        {/* Profile & Location Settings Form (Centered Layout) */}
+        <div className="bg-white border border-[#E8E7EF] rounded-3xl p-6 sm:p-8 shadow-xs max-w-3xl mx-auto">
           <h3 className="text-xl font-black text-[#0F0F14] mb-1">Personal Details & Home Location</h3>
           <p className="text-xs text-[#68677A] font-bold mb-6">
             Update your mobile phone number and home location to personalize your local event discovery feed.
@@ -269,7 +275,7 @@ export default function ProfilePage() {
                 type="email"
                 disabled
                 value={user?.email || ''}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-full px-4 py-3 text-sm font-bold text-[#68677A] cursor-not-allowed"
+                className="w-full bg-[#F4F3F8] border border-[#E8E8EF] rounded-full px-4 py-3 text-sm font-bold text-[#68677A] cursor-not-allowed"
               />
             </div>
 
@@ -359,11 +365,11 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="pt-4 flex justify-end">
+            <div className="pt-4 flex justify-center sm:justify-end">
               <button
                 type="submit"
                 disabled={saving}
-                className="px-6 py-3 rounded-full bg-[#0F0F14] hover:bg-black text-white font-extrabold text-xs transition shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="w-full sm:w-auto px-8 py-3 rounded-full bg-[#0F0F14] hover:bg-black text-white font-extrabold text-xs transition shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {saving ? (
                   <span>Saving Changes...</span>

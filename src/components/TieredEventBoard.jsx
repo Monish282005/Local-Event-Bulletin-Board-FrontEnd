@@ -64,7 +64,7 @@ function SectionTier({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 items-start">
             {events.map((event) => (
               <EventCard
                 key={event.id}
@@ -106,7 +106,7 @@ export default function TieredEventBoard({
     return (
       <div className="space-y-8">
         <div className="h-7 w-56 bg-slate-200 rounded-lg animate-pulse mb-4"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {[1, 2, 3].map((idx) => (
             <SkeletonCard key={idx} />
           ))}

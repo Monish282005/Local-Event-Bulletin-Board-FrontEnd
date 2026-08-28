@@ -1,16 +1,16 @@
 export const POPULAR_CITIES = [
-  { name: 'Coimbatore', state: 'Tamil Nadu', icon: '🌴' },
-  { name: 'Bengaluru', state: 'Karnataka', icon: '🏙️' },
-  { name: 'Mumbai', state: 'Maharashtra', icon: '🌊' },
-  { name: 'Delhi NCR', state: 'Delhi', icon: '🏛️' },
-  { name: 'Chennai', state: 'Tamil Nadu', icon: '🏖️' },
-  { name: 'Hyderabad', state: 'Telangana', icon: '🏰' },
-  { name: 'Pune', state: 'Maharashtra', icon: '🎓' },
-  { name: 'Kolkata', state: 'West Bengal', icon: '🌉' },
-  { name: 'Ahmedabad', state: 'Gujarat', icon: '🪁' },
-  { name: 'Kochi', state: 'Kerala', icon: '⛵' },
-  { name: 'Mysuru', state: 'Karnataka', icon: '👑' },
-  { name: 'Chandigarh', state: 'Punjab', icon: '🌳' },
+  { name: 'Coimbatore', state: 'Tamil Nadu', iconName: 'Trees' },
+  { name: 'Bengaluru', state: 'Karnataka', iconName: 'Building2' },
+  { name: 'Mumbai', state: 'Maharashtra', iconName: 'Waves' },
+  { name: 'Delhi NCR', state: 'Delhi', iconName: 'Landmark' },
+  { name: 'Chennai', state: 'Tamil Nadu', iconName: 'Sun' },
+  { name: 'Hyderabad', state: 'Telangana', iconName: 'Castle' },
+  { name: 'Pune', state: 'Maharashtra', iconName: 'GraduationCap' },
+  { name: 'Kolkata', state: 'West Bengal', iconName: 'Compass' },
+  { name: 'Ahmedabad', state: 'Gujarat', iconName: 'Wind' },
+  { name: 'Kochi', state: 'Kerala', iconName: 'Anchor' },
+  { name: 'Mysuru', state: 'Karnataka', iconName: 'Crown' },
+  { name: 'Chandigarh', state: 'Punjab', iconName: 'Trees' },
 ];
 
 /**

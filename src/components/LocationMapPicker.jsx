@@ -276,7 +276,7 @@ export default function LocationMapPicker({
         <div ref={mapContainerRef} className="w-full h-full z-10" />
 
         {/* Map Helper Badge Overlay */}
-        <div className="absolute top-3 left-3 z-[400] bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#E8E7EF] shadow-md text-[11px] font-bold text-[#11112A] flex items-center gap-1.5">
+        <div className="absolute top-3 left-3 z-15 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#E8E7EF] shadow-md text-[11px] font-bold text-[#11112A] flex items-center gap-1.5">
           <span>{mapType === 'satellite' ? '🛰️ Hybrid Satellite View (With Place & Street Labels)' : '🗺️ Street View'}</span>
           <span>• Click or drag pin to set location</span>
         </div>

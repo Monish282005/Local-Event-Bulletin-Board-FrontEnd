@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import axiosClient from '../api/axiosClient';
 import LocationMapPicker from './LocationMapPicker';
 import CustomDateTimePicker from './CustomDateTimePicker';
+import CustomCategorySelect from './CustomCategorySelect';
 import {
   fetchCountriesFromApi,
   fetchStatesFromApi,
@@ -97,8 +98,9 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
     }
   };
 
+  // Initialize form fields ONLY when modal opens or when event.id changes
   useEffect(() => {
-    if (event) {
+    if (isOpen && event) {
       setTitle(event.title || '');
       setDescription(event.description || '');
       setCategory(event.category || 'sports');
@@ -117,7 +119,7 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
 
       setError(null);
     }
-  }, [event]);
+  }, [isOpen, event?.id]);
 
   useEffect(() => {
     if (isOpen) {
@@ -410,20 +412,13 @@ export default function EditEventModal({ isOpen, onClose, event, onEventUpdated 
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 relative z-30">
+            <div className="relative z-30">
               <label className="block text-xs font-semibold text-[#11112A] mb-1.5">Category *</label>
-              <select
+              <CustomCategorySelect
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-[#F4F3F8] border border-[#E8E7EF] rounded-xl px-3 py-2 text-xs text-[#11112A] focus:bg-white focus:outline-none focus:border-[#0F172A] transition font-bold"
-              >
-                {CATEGORIES.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </option>
-                ))}
-              </select>
+                onChange={(val) => setCategory(val)}
+              />
             </div>
 
             <div>

@@ -45,31 +45,152 @@ export default function BookingPassCard({ booking, onBookingCancelled }) {
     if (e) e.stopPropagation();
     if (!canCancel || cancelling || isCompleted) return;
 
-    const result = await Swal.fire({
-      title: 'Cancel Booking Pass?',
-      text: `Are you sure you want to cancel your ${total_user_tickets} reserved ${total_user_tickets === 1 ? 'ticket' : 'tickets'} for "${event.title}"? Seats will be returned to available inventory.`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#EF4444',
-      cancelButtonColor: '#64748B',
-      confirmButtonText: 'Yes, Cancel Pass',
-      cancelButtonText: 'Keep Pass',
-      customClass: {
-        popup: 'rounded-3xl p-6 font-sans',
-        confirmButton: 'px-5 py-2.5 rounded-full text-xs font-bold shadow-md',
-        cancelButton: 'px-5 py-2.5 rounded-full text-xs font-bold',
-      },
-    });
+    let qtyToCancel = total_user_tickets;
 
-    if (!result.isConfirmed) return;
+    if (total_user_tickets > 1) {
+      const result = await Swal.fire({
+        title: 'Cancel Reserved Tickets',
+        html: `
+          <div class="space-y-4 font-sans text-left">
+            <p class="text-xs text-slate-500 font-bold text-center leading-relaxed">
+              You currently have <span class="text-slate-900 font-black text-xs px-2 py-0.5 rounded-full bg-slate-100 border border-slate-200">${total_user_tickets} passes</span> reserved for <br/><strong class="text-slate-800 text-sm">"${event.title}"</strong>.
+            </p>
+            
+            <div class="bg-gradient-to-b from-slate-50 to-slate-100/70 border border-slate-200/80 rounded-2xl p-4 space-y-3.5 shadow-2xs">
+              <label class="block text-[11px] font-black uppercase tracking-wider text-slate-600 text-center">
+                Number of Tickets to Remove
+              </label>
+
+              <div class="flex items-center justify-center gap-3">
+                <button type="button" id="swal-btn-minus" class="w-11 h-11 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-xl shadow-xs hover:bg-slate-50 active:scale-95 transition flex items-center justify-center cursor-pointer select-none">&minus;</button>
+
+                <input
+                  type="number"
+                  id="swal-cancel-input"
+                  min="1"
+                  max="${total_user_tickets}"
+                  value="1"
+                  class="w-24 h-11 text-center text-xl font-black text-slate-900 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-slate-900 shadow-xs"
+                />
+
+                <button type="button" id="swal-btn-plus" class="w-11 h-11 rounded-xl bg-white border border-slate-200 text-slate-800 font-black text-xl shadow-xs hover:bg-slate-50 active:scale-95 transition flex items-center justify-center cursor-pointer select-none">&plus;</button>
+              </div>
+
+              <!-- Live Calculation Badge -->
+              <div id="swal-live-summary" class="p-3 rounded-xl bg-slate-900 text-white text-xs font-bold text-center shadow-xs flex items-center justify-center gap-1.5 transition-all">
+                <span>Cancelling <strong id="swal-cancel-count" class="text-amber-400 font-black">1</strong> ticket</span>
+                <span class="text-slate-500">&bull;</span>
+                <span><strong id="swal-remain-count" class="text-emerald-400 font-black">${total_user_tickets - 1}</strong> will stay reserved</span>
+              </div>
+
+              <!-- Live Validation Banner -->
+              <div id="swal-val-banner" class="hidden p-3 rounded-xl bg-red-500 text-white text-xs font-bold text-center shadow-md"></div>
+            </div>
+          </div>
+        `,
+        didOpen: () => {
+          const input = document.getElementById('swal-cancel-input');
+          const btnMinus = document.getElementById('swal-btn-minus');
+          const btnPlus = document.getElementById('swal-btn-plus');
+          const cancelCount = document.getElementById('swal-cancel-count');
+          const remainCount = document.getElementById('swal-remain-count');
+          const summaryBox = document.getElementById('swal-live-summary');
+          const valBanner = document.getElementById('swal-val-banner');
+
+          const updateSummary = () => {
+            const val = parseInt(input.value, 10);
+            if (isNaN(val) || val <= 0) {
+              valBanner.innerText = '⚠️ Please enter at least 1 ticket to cancel.';
+              valBanner.classList.remove('hidden');
+              summaryBox.classList.add('hidden');
+            } else if (val > total_user_tickets) {
+              valBanner.innerText = `⚠️ Limit Exceeded! You only have ${total_user_tickets} reserved tickets. You cannot remove ${val} tickets.`;
+              valBanner.classList.remove('hidden');
+              summaryBox.classList.add('hidden');
+            } else {
+              valBanner.classList.add('hidden');
+              summaryBox.classList.remove('hidden');
+              cancelCount.innerText = val;
+              const remaining = total_user_tickets - val;
+              remainCount.innerText = remaining === 0 ? '0 (Entire booking cancelled)' : remaining;
+            }
+          };
+
+          input.addEventListener('input', updateSummary);
+
+          btnMinus.addEventListener('click', () => {
+            let current = parseInt(input.value, 10) || 1;
+            if (current > 1) {
+              input.value = current - 1;
+              updateSummary();
+            }
+          });
+
+          btnPlus.addEventListener('click', () => {
+            let current = parseInt(input.value, 10) || 1;
+            if (current < total_user_tickets) {
+              input.value = current + 1;
+              updateSummary();
+            }
+          });
+        },
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#64748B',
+        confirmButtonText: 'Confirm Cancellation',
+        cancelButtonText: 'Keep Tickets',
+        customClass: {
+          popup: 'rounded-3xl p-6 font-sans',
+          confirmButton: 'px-5 py-2.5 rounded-full text-xs font-bold shadow-md',
+          cancelButton: 'px-5 py-2.5 rounded-full text-xs font-bold',
+        },
+        preConfirm: () => {
+          const input = document.getElementById('swal-cancel-input');
+          const val = parseInt(input?.value, 10);
+          if (isNaN(val) || val <= 0) {
+            Swal.showValidationMessage('Please enter at least 1 ticket to cancel.');
+            return false;
+          }
+          if (val > total_user_tickets) {
+            Swal.showValidationMessage(`You only have ${total_user_tickets} tickets reserved. Cannot cancel ${val} tickets.`);
+            return false;
+          }
+          return val;
+        },
+      });
+
+      if (!result.isConfirmed) return;
+      qtyToCancel = result.value || 1;
+    } else {
+      const result = await Swal.fire({
+        title: 'Cancel Booking Pass?',
+        text: `Are you sure you want to cancel your reserved ticket pass for "${event.title}"? Seats will be returned to available inventory.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#EF4444',
+        cancelButtonColor: '#64748B',
+        confirmButtonText: 'Yes, Cancel Pass',
+        cancelButtonText: 'Keep Pass',
+        customClass: {
+          popup: 'rounded-3xl p-6 font-sans',
+          confirmButton: 'px-5 py-2.5 rounded-full text-xs font-bold shadow-md',
+          cancelButton: 'px-5 py-2.5 rounded-full text-xs font-bold',
+        },
+      });
+
+      if (!result.isConfirmed) return;
+      qtyToCancel = 1;
+    }
 
     setCancelling(true);
     try {
-      const response = await axiosClient.delete(`/api/events/${event.id}/rsvp`);
+      const response = await axiosClient.delete(`/api/events/${event.id}/rsvp`, {
+        data: { quantity: qtyToCancel },
+      });
 
       await Swal.fire({
-        title: 'Pass Cancelled!',
-        text: response.data.message || 'Your ticket booking pass has been cancelled and seats restored.',
+        title: 'Cancellation Confirmed!',
+        text: response.data.message || `Successfully cancelled ${qtyToCancel} ticket pass(es).`,
         icon: 'success',
         confirmButtonColor: '#0F172A',
         customClass: {

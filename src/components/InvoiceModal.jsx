@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Ticket, Printer, X, Mail } from 'lucide-react';
 import QRCode from 'qrcode';
 import { useAuth } from '../context/AuthContext';
+import { getCategoryDefaultImage } from '../utils/defaultCategoryImages';
 
 export default function InvoiceModal({ isOpen, onClose, invoiceData }) {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ export default function InvoiceModal({ isOpen, onClose, invoiceData }) {
 
   const locationStr = event?.location || 'Venue Location';
   const cityStr = event?.city || event?.district || 'Local City';
-  const displayImage = event?.image_url || localStorage.getItem(`event_img_${event?.id}`);
+  const displayImage = event?.image_url || localStorage.getItem(`event_img_${event?.id}`) || getCategoryDefaultImage(event?.category);
 
   // Current logged in user details
   const attendeeName = authUser?.name || propUser?.name || invoiceData?.user_name || 'Valued Guest';
@@ -245,19 +246,19 @@ export default function InvoiceModal({ isOpen, onClose, invoiceData }) {
           {/* Main Outer Ticket Container */}
           <div className="rounded-3xl overflow-hidden border border-slate-700/80 shadow-xl bg-[#0F172A] text-white">
 
-            {/* Upper Pass Banner with Modern Deep Gradient */}
-            <div className="bg-gradient-to-br from-[#0F172A] via-[#1E1B4B] to-[#312E81] p-5 sm:p-6 relative overflow-hidden">
+            {/* Upper Pass Banner with Responsive Flex Layout */}
+            <div className="bg-gradient-to-br from-[#0F172A] via-[#1E1B4B] to-[#312E81] p-4 sm:p-6 relative overflow-hidden">
               {/* Decorative Background Glow */}
               <div className="absolute -top-12 -right-12 w-40 h-40 bg-indigo-500/20 rounded-full blur-2xl pointer-events-none"></div>
 
-              <div className="relative z-10 flex items-start justify-between gap-4">
+              <div className="relative z-10 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-4 text-center sm:text-left">
                 {/* Pass Info Left Side */}
-                <div className="space-y-3 flex-1 min-w-0">
+                <div className="space-y-3 flex-1 min-w-0 w-full">
                   <div>
                     <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-indigo-300 bg-indigo-500/20 px-2.5 py-0.5 rounded-full border border-indigo-400/30">
                       ⭐ OFFICIAL ENTRY PASS
                     </span>
-                    <h4 className="text-lg sm:text-xl font-black tracking-tight text-white leading-tight mt-1.5 truncate">
+                    <h4 className="text-lg sm:text-xl font-black tracking-tight text-white leading-tight mt-1.5 break-words">
                       {eventTitle}
                     </h4>
                   </div>
@@ -265,20 +266,20 @@ export default function InvoiceModal({ isOpen, onClose, invoiceData }) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1 text-xs">
                     <div className="min-w-0">
                       <span className="text-[9px] uppercase font-extrabold text-indigo-300/80 block tracking-wider">ATTENDEE</span>
-                      <span className="font-bold text-white italic truncate block">{attendeeName}</span>
+                      <span className="font-bold text-white italic block break-words">{attendeeName}</span>
                     </div>
                     <div className="min-w-0">
                       <span className="text-[9px] uppercase font-extrabold text-indigo-300/80 block tracking-wider">PASS CODE</span>
-                      <span className="font-mono font-bold text-indigo-200 block tracking-wide truncate">{displayPassCode}</span>
+                      <span className="font-mono font-bold text-indigo-200 block tracking-wide text-xs break-all">{displayPassCode}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* QR Code Container Right Side */}
                 {qrCodeUrl && (
-                  <div className="bg-white p-2 rounded-2xl shadow-2xl border border-indigo-200/50 flex-shrink-0 flex flex-col items-center">
-                    <img src={qrCodeUrl} alt="Ticket QR Code" className="w-22 h-22 sm:w-24 sm:h-24 rounded-xl object-contain" />
-                    <span className="text-[8px] font-black text-slate-500 tracking-wider uppercase mt-1">SCAN AT ENTRY</span>
+                  <div className="bg-white p-2.5 rounded-2xl shadow-2xl border border-indigo-200/50 flex-shrink-0 flex flex-col items-center mx-auto sm:mx-0 max-w-full">
+                    <img src={qrCodeUrl} alt="Ticket QR Code" className="w-24 h-24 sm:w-26 sm:h-26 rounded-xl object-contain max-w-full" />
+                    <span className="text-[8px] font-black text-slate-500 tracking-wider uppercase mt-1 whitespace-nowrap">SCAN AT ENTRY</span>
                   </div>
                 )}
               </div>
@@ -297,15 +298,15 @@ export default function InvoiceModal({ isOpen, onClose, invoiceData }) {
             </div>
 
             {/* Bottom Ticket Stub */}
-            <div className="bg-slate-900/90 p-4 flex items-center justify-between text-xs gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="font-black text-white text-sm truncate">{eventTitle}</p>
-                <p className="text-[11.5px] font-bold text-slate-400 mt-0.5 truncate">
+            <div className="bg-slate-900/90 p-3.5 sm:p-4 flex flex-col sm:flex-row items-center sm:items-center justify-between text-xs gap-2.5 sm:gap-3 text-center sm:text-left">
+              <div className="min-w-0 flex-1 w-full">
+                <p className="font-black text-white text-xs sm:text-sm break-words">{eventTitle}</p>
+                <p className="text-[11.5px] font-bold text-slate-400 mt-0.5 break-words">
                   {attendeeName} · <span className="text-indigo-300">{qty} Ticket{qty > 1 ? 's' : ''}</span>
                 </p>
               </div>
-              <div className="flex-shrink-0">
-                <span className="font-mono font-black text-indigo-300 bg-indigo-500/20 border border-indigo-500/30 px-3 py-1.5 rounded-xl tracking-wider text-xs block text-center">
+              <div className="flex-shrink-0 w-full sm:w-auto">
+                <span className="font-mono font-black text-indigo-300 bg-indigo-500/20 border border-indigo-500/30 px-3.5 py-1.5 rounded-xl tracking-wider text-xs block text-center break-all shadow-sm">
                   {displayPassCode}
                 </span>
               </div>

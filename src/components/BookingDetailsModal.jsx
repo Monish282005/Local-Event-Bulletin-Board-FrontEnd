@@ -93,8 +93,8 @@ export default function BookingDetailsModal({
   const googleMapsUrl = lat && lng
     ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-        `${event.location}, ${event.city || event.neighborhood}, ${event.state}, ${event.country || 'India'}`
-      )}`;
+      `${event.location}, ${event.city || event.neighborhood}, ${event.state}, ${event.country || 'India'}`
+    )}`;
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/60 backdrop-blur-sm font-sans">
@@ -242,6 +242,8 @@ export default function BookingDetailsModal({
 
             <a
               href={`mailto:${organizerEmail}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-3 py-1.5 rounded-full bg-white text-[#0F172A] hover:bg-slate-50 text-xs font-bold transition flex items-center gap-1 border border-[#E2E8F0] cursor-pointer shadow-2xs"
             >
               <Mail className="w-3.5 h-3.5 text-[#0F172A]" />
