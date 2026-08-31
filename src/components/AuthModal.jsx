@@ -167,26 +167,30 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
           callback: async (tokenResponse) => {
             if (tokenResponse && tokenResponse.access_token) {
               try {
-                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-                });
-                const googleUser = await userInfoRes.json();
-
-                if (googleUser && googleUser.email) {
-                  await loginWithGoogle({
-                    email: googleUser.email,
-                    name: googleUser.name || googleUser.given_name || 'Google User',
-                    google_id: googleUser.sub || `google_${Date.now()}`,
-                    city: city || 'Bengaluru',
-                    state: state || 'Karnataka',
-                    district: district || 'Bengaluru Urban',
-                    country: country || 'India',
+                let googleUser = null;
+                try {
+                  const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
                   });
-                  onClose();
-                  if (onSuccess) onSuccess();
-                } else {
-                  setError('Failed to fetch Google profile info. Please try again.');
+                  if (userInfoRes.ok) {
+                    googleUser = await userInfoRes.json();
+                  }
+                } catch (fErr) {
+                  console.warn('Frontend fetch google userinfo failed, fallback to backend:', fErr);
                 }
+
+                await loginWithGoogle({
+                  access_token: tokenResponse.access_token,
+                  email: googleUser?.email,
+                  name: googleUser?.name || googleUser?.given_name || 'Google User',
+                  google_id: googleUser?.sub,
+                  city: city || 'Bengaluru',
+                  state: state || 'Karnataka',
+                  district: district || 'Bengaluru Urban',
+                  country: country || 'India',
+                });
+                onClose();
+                if (onSuccess) onSuccess();
               } catch (verifyErr) {
                 console.error('Google profile fetch error:', verifyErr);
                 setError(verifyErr.response?.data?.error || 'Google login failed.');
